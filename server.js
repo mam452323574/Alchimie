@@ -32,6 +32,8 @@ const { getOnlineCount } = require('./utils/presence');
 const { needsPageChrome } = require('./utils/request');
 const { logSecurityEvent, securityRequestMonitor } = require('./utils/security');
 const { csrfProtection } = require('./middleware/csrf');
+const botShield = require('./middleware/bot-shield');
+const { inputGuard } = require('./middleware/input-guard');
 const { rankForPoints } = require('./utils/points');
 
 const app = express();
@@ -102,7 +104,9 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(botShield);
 app.use(express.urlencoded({ extended: false, limit: '200kb', parameterLimit: 120 }));
+app.use(inputGuard);
 app.use(express.static(path.join(__dirname, 'public'), {
   dotfiles: 'deny',
   index: false,
@@ -279,6 +283,7 @@ function shutdown(signal) {
   shuttingDown = true;
   console.log(`[server] Arrêt propre demandé (${signal}).`);
   httpServer.close(() => {
+    try { botShield.close(); } catch (_error) { /* minuterie déjà arrêtée */ }
     try { sessionStore.close(); } catch (_error) { /* fermeture déjà effectuée */ }
     try { db.pragma('wal_checkpoint(TRUNCATE)'); db.close(); } catch (_error) { /* fermeture déjà effectuée */ }
     process.exit(0);

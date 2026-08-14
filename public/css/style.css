@@ -982,8 +982,30 @@ button, input, textarea, select { font: inherit; }
 .security-period-tabs a { padding: 7px 12px; border-radius: 6px; color: #8190a5; font-size: 9px; font-weight: 800; }
 .security-period-tabs a:hover { color: #c6d3e2; }
 .security-period-tabs a.active { background: #2b65ac; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.security-metric-grid { grid-template-columns: repeat(3,minmax(180px,1fr)); }
+.security-metric-grid small,
+.security-metric-grid em { overflow: visible; text-overflow: clip; white-space: normal; }
 .security-overview-grid { display: grid; grid-template-columns: minmax(0,.9fr) minmax(380px,1.1fr); gap: 17px; margin-bottom: 17px; }
 .security-data-grid { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: 17px; margin-bottom: 17px; }
+.bot-shield-card { margin-bottom: 17px; }
+.bot-shield-head { align-items: flex-start; }
+.bot-shield-head p:last-child { max-width: 720px; margin: 4px 0 0; color: #748399; font-size: 8px; line-height: 1.5; }
+.bot-shield-status { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #315c49; border-radius: 999px; background: #142820; color: #69d19d; font-size: 8px; font-weight: 900; text-transform: uppercase; }
+.bot-shield-status i { width: 7px; height: 7px; border-radius: 50%; background: #48bd82; box-shadow: 0 0 0 4px rgba(72,189,130,.13); }
+.bot-shield-status.inactive { border-color: #70414a; background: #321e24; color: #f0929b; }
+.bot-shield-status.inactive i { background: #df6571; box-shadow: 0 0 0 4px rgba(223,101,113,.13); }
+.bot-shield-live-grid { display: grid; grid-template-columns: repeat(6,minmax(110px,1fr)); gap: 8px; margin: 14px 0; }
+.bot-shield-live-grid article { display: grid; gap: 2px; min-width: 0; padding: 11px; border: 1px solid #2d3b50; border-radius: 8px; background: #111c2c; }
+.bot-shield-live-grid small { overflow: hidden; color: #8190a5; font-size: 7px; font-weight: 800; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.bot-shield-live-grid strong { color: #edf3fa; font-size: 20px; line-height: 1.1; }
+.bot-shield-live-grid span { overflow: hidden; color: #66768c; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.bot-shield-table-wrap { border-top: 1px solid #29364b; }
+.bot-shield-table { min-width: 920px; }
+.bot-shield-table td > strong, .bot-shield-table td > small { display: block; }
+.bot-shield-table td > small { margin-top: 3px; color: #748399; font-size: 7px; }
+.bot-shield-table code { display: block; max-width: 230px; overflow: hidden; color: #9fc4ef; font: 8px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; text-overflow: ellipsis; white-space: nowrap; }
+.bot-shield-table time { color: #8796aa; font-size: 8px; white-space: nowrap; }
+.bot-shield-unban { border: 0; background: transparent; cursor: pointer; }
 .security-trend-chart { height: 190px; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 8px; padding: 20px 8px 4px; border-bottom: 1px solid #314057; background: repeating-linear-gradient(to top, transparent 0, transparent 46px, rgba(88,106,132,.16) 47px); }
 .security-trend-column { min-width: 0; height: 100%; display: grid; grid-template-rows: 1fr 18px; align-items: end; gap: 5px; }
 .security-trend-bars { height: 100%; display: flex; align-items: end; justify-content: center; gap: 3px; }
@@ -1044,6 +1066,7 @@ button, input, textarea, select { font: inherit; }
 @media (max-width: 1200px) {
   .admin-metric-grid { grid-template-columns: repeat(3, 1fr); }
   .security-overview-grid, .security-data-grid { grid-template-columns: 1fr; }
+  .bot-shield-live-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .maintenance-form { grid-template-columns: 1fr 1fr; }
   .maintenance-message-field { grid-column: 1 / -1; }
 }
@@ -1114,6 +1137,7 @@ button, input, textarea, select { font: inherit; }
   .status-components { padding: 18px 14px; }
   .status-components .page-head, .status-components article, .scheduled-maintenance { align-items: flex-start; flex-direction: column; }
   .security-summary-pill { max-width: none; }
+  .bot-shield-live-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .security-period-tabs { width: 100%; overflow-x: auto; }
   .security-period-tabs a { flex: 1; min-width: max-content; text-align: center; }
   .maintenance-form { grid-template-columns: 1fr; }

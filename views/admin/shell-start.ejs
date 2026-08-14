@@ -8,7 +8,8 @@
       <a class="<%= path === '/admin/sanctions' ? 'active' : '' %>" href="/admin/sanctions"><span class="glyphicon glyphicon-ban-circle"></span>Sanctions</a>
       <a class="<%= path === '/admin/contenus-supprimes' ? 'active' : '' %>" href="/admin/contenus-supprimes"><span class="glyphicon glyphicon-trash"></span>Contenus supprimés</a>
       <% if (currentUser.role === 'admin' || currentUser.role === 'developer') { %><a class="<%= path === '/admin/structure' ? 'active' : '' %>" href="/admin/structure"><span class="glyphicon glyphicon-folder-open"></span>Structure du forum</a><% } %>
-      <% if (currentUser.role === 'developer') { %><p>Technique</p><a class="<%= path === '/developpeur' ? 'active' : '' %>" href="/developpeur"><span class="glyphicon glyphicon-hdd"></span>État du service</a><a class="<%= path === '/developpeur/securite' ? 'active' : '' %>" href="/developpeur/securite" target="_blank" rel="noopener"><span class="glyphicon glyphicon-lock"></span>Signaux de sécurité</a><% } %>
+      <% if (currentUser.role === 'admin' || currentUser.role === 'developer') { %><a class="<%= path === '/admin/securite' ? 'active' : '' %>" href="/admin/securite"><span class="glyphicon glyphicon-lock"></span>Bot Shield & sécurité</a><% } %>
+      <% if (currentUser.role === 'developer') { %><p>Technique</p><a class="<%= path === '/developpeur' ? 'active' : '' %>" href="/developpeur"><span class="glyphicon glyphicon-hdd"></span>État du service</a><% } %>
       <p>Liens utiles</p>
       <a href="/moderation"><span class="glyphicon glyphicon-list-alt"></span>Journal public</a>
       <a href="/statistiques"><span class="glyphicon glyphicon-stats"></span>Statistiques</a>

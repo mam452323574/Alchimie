@@ -52,7 +52,9 @@ function logSecurityEvent(req, event = {}) {
 }
 
 function securityRequestMonitor(req, res, next) {
-  const rawTarget = String(req.originalUrl || req.url || '').slice(0, 500);
+  // Les recherches et contenus libres peuvent légitimement parler de sécurité.
+  // On inspecte donc uniquement le chemin, jamais la query ni le corps de requête.
+  const rawTarget = String(req.path || req.url || '').split('?')[0].slice(0, 500);
   let requestTarget = rawTarget;
   try { requestTarget = decodeURIComponent(rawTarget); } catch (_error) {
     logSecurityEvent(req, {
@@ -94,4 +96,4 @@ function securityRequestMonitor(req, res, next) {
   next();
 }
 
-module.exports = { logSecurityEvent, securityRequestMonitor };
+module.exports = { logSecurityEvent, securityRequestMonitor, sourceFingerprint };

@@ -26,13 +26,15 @@ correctifs.
 | CSRF | Publication, suppression ou sanction à l’insu d’un membre connecté | Jeton aléatoire lié à la session sur toutes les écritures, vérification `Origin`/`Referer` et rejet de `Sec-Fetch-Site` non fiable |
 | XSS stockée/réfléchie | Vol de session, actions au nom de la victime | Échappement EJS, liste blanche `sanitize-html`, URL et balises limitées, CSP, scripts uniquement locaux, iframes isolées |
 | Injection SQL | Lecture ou altération de la BDD | Requêtes préparées ; seules quelques constructions internes utilisent des fragments issus de listes fermées |
+| Pollution de paramètres / clés d’injection | Contournement de validation, erreurs serveur | Garde global refusant tableaux, objets, doublons ambigus, clés `$...` et clés de pollution de prototype ; textes libres conservés |
 | IDOR / accès aux MP | Lecture d’une conversation d’autrui | Vérification serveur de l’appartenance avant chaque page, fragment, flux, upload et envoi ; réponse 404 uniforme |
 | Pixel de pistage dans un MP | Divulgation de l’IP d’un destinataire | Les médias externes restent de simples liens dans les MP ; seules les images servies localement par `/media` sont intégrées |
 | Escalade de privilèges | Contrôle de la modération | Contrôles serveur par rôle, hiérarchie des rôles, second verrou, durée courte, journalisation des changements |
 | Force brute / credential stuffing | Prise de compte | Limites par source et par identifiant, bcrypt coût 12, réponse générique, journal d’alertes, limite Nginx et Fail2ban recommandés |
 | Compte factice | Spam et abus | Validation e-mail avec jeton aléatoire haché, usage unique et expiration 24 h |
-| Upload malveillant ou saturation disque | XSS, déni de service, remplissage du VPS | Formats reconnus par signature, extension générée, nom non contrôlé, `nosniff`, CSP restrictive sur le média, limite 5 Mo, dimensions/pixels, quotas membre et capacité globale |
-| Épuisement par SSE / requêtes | Déni de service | Nombre de flux limité, expiration automatique des flux, fréquence de frappe limitée, limite globale Express et limites Nginx |
+| Upload malveillant ou saturation disque | XSS, déni de service, remplissage du VPS | Décodage réel par Sharp, formats raster en liste blanche, réencodage WebP sans métadonnées ni contenu ajouté, extension générée, `nosniff`, CSP restrictive, limites pixels/images animées/5 Mo, concurrence bornée, quotas atomiques membre et capacité globale |
+| Scanner automatisé / reconnaissance | Recherche de secrets, composants obsolètes ou consoles | Bot Shield progressif : 404 silencieuse aux premières sondes, empreinte pseudonymisée, blocage temporaire après cinq motifs fiables, journal persistant et déblocage staff sans IP brute |
+| Épuisement par SSE / requêtes | Déni de service | Nombre de flux limité, expiration automatique des flux, fréquence de frappe limitée, limite globale Express, flood Bot Shield à seuil élevé et exemptions pour les flux légitimes |
 | Fuite d’une copie SQLite | Exposition des e-mails et MP | Chiffrement AES-256-GCM des e-mails et messages privés en production ; index e-mail par HMAC ; mots de passe hachés et salés |
 | Vol du VPS ou des secrets | Compromission complète | Processus non-root, code en lecture seule via systemd, permissions `0600/0700`, pare-feu, SSH par clés, secrets hors dépôt et sauvegardes chiffrées |
 | Dépendance compromise | Exécution de code / faille connue | Dépendances inutiles retirées, lockfile, audit npm sans vulnérabilité connue, installation par `npm ci`, contrôle périodique |
@@ -79,7 +81,7 @@ correctifs.
 ## 5. Veille et réponse à incident
 
 - Hebdomadaire : dépendances, alertes Node.js, Express, Helmet, SQLite et système.
-- Quotidien : signaux critiques dans `/developpeur/securite`, erreurs Nginx,
+- Quotidien : signaux critiques et Bot Shield dans `/admin/securite`, erreurs Nginx,
   utilisation disque, tentatives de connexion et disponibilité des sauvegardes.
 - Mensuel : restauration de sauvegarde, revue des comptes staff, rotation des
   accès devenus inutiles, contrôle TLS et permissions.

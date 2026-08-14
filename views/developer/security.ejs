@@ -3,31 +3,55 @@
 
 <header class="admin-page-header security-page-header">
   <div>
-    <p class="admin-kicker">Développeurs uniquement</p>
-    <h1>Signaux de sécurité</h1>
-    <p>Détection applicative, contrôles de configuration et suivi des événements à examiner.</p>
+    <p class="admin-kicker">Administration sécurisée</p>
+    <h1>Bot Shield & sécurité</h1>
+    <p>Blocage progressif des scanners, pipeline d’upload durci et signaux à examiner.</p>
   </div>
-  <span class="security-summary-pill <%= metrics.critical ? 'security-summary-alert' : 'security-summary-ok' %>"><i></i><%= metrics.critical ? metrics.critical + ' signal' + (metrics.critical > 1 ? 'aux critiques' : ' critique') + ' à examiner' : 'Aucun signal critique sur la période' %></span>
+  <span class="security-summary-pill <%= metrics.critical || botShieldStats.activeBans ? 'security-summary-alert' : 'security-summary-ok' %>"><i></i><%= botShieldStats.activeBans ? botShieldStats.activeBans + ' source' + (botShieldStats.activeBans > 1 ? 's bloquées' : ' bloquée') : (metrics.critical ? metrics.critical + ' signal' + (metrics.critical > 1 ? 'aux critiques' : ' critique') + ' à examiner' : 'Protection active, aucun blocage en cours') %></span>
 </header>
 
 <aside class="security-interpretation-note">
   <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-  <p><strong>Un signal n’est pas une preuve de compromission.</strong> Cette vue aide à repérer des comportements inhabituels sans afficher de mots de passe, cookies, e-mails ou adresses IP brutes. Les sources sont pseudonymisées.</p>
+  <p><strong>Un signal n’est pas une preuve de compromission.</strong> Les protections sont volontairement progressives pour ne pas gêner l’usage normal. Aucun mot de passe, cookie, e-mail, corps de message ou adresse IP brute n’est affiché ; les sources sont pseudonymisées.</p>
 </aside>
 
 <nav class="security-period-tabs" aria-label="Période des signaux">
-  <a class="<%= period === 'day' ? 'active' : '' %>" href="?periode=day">24 heures</a>
-  <a class="<%= period === 'week' ? 'active' : '' %>" href="?periode=week">7 jours</a>
-  <a class="<%= period === 'month' ? 'active' : '' %>" href="?periode=month">30 jours</a>
+  <a class="<%= period === 'day' ? 'active' : '' %>" href="/admin/securite?periode=day">24 heures</a>
+  <a class="<%= period === 'week' ? 'active' : '' %>" href="/admin/securite?periode=week">7 jours</a>
+  <a class="<%= period === 'month' ? 'active' : '' %>" href="/admin/securite?periode=month">30 jours</a>
 </nav>
 
 <section class="admin-metric-grid security-metric-grid" aria-label="Indicateurs de sécurité">
   <article><span class="admin-metric-icon metric-blue glyphicon glyphicon-signal"></span><div><small>Événements</small><strong><%= metrics.events %></strong><em>tous niveaux</em></div></article>
   <article class="<%= metrics.critical ? 'metric-attention' : '' %>"><span class="admin-metric-icon metric-red glyphicon glyphicon-lock"></span><div><small>Critiques</small><strong><%= metrics.critical %></strong><em>à qualifier</em></div></article>
+  <article class="<%= metrics.botBlocks ? 'metric-attention' : '' %>"><span class="admin-metric-icon metric-violet glyphicon glyphicon-ban-circle"></span><div><small>Blocages Bot Shield</small><strong><%= metrics.botBlocks %></strong><em>sur la période</em></div></article>
   <article><span class="admin-metric-icon metric-orange glyphicon glyphicon-user"></span><div><small>Connexions refusées</small><strong><%= metrics.failedLogins %></strong><em>compte ou second verrou</em></div></article>
   <article><span class="admin-metric-icon metric-violet glyphicon glyphicon-search"></span><div><small>Sondes sensibles</small><strong><%= metrics.sensitiveProbes %></strong><em>reconnaissance détectée</em></div></article>
-  <article><span class="admin-metric-icon metric-slate glyphicon glyphicon-ban-circle"></span><div><small>Accès refusés</small><strong><%= metrics.accessDenied %></strong><em>droits insuffisants</em></div></article>
-  <article><span class="admin-metric-icon metric-red glyphicon glyphicon-hdd"></span><div><small>Erreurs serveur</small><strong><%= metrics.serverErrors %></strong><em>réponses HTTP 5xx</em></div></article>
+  <article class="<%= metrics.uploadThreats ? 'metric-attention' : '' %>"><span class="admin-metric-icon metric-slate glyphicon glyphicon-picture"></span><div><small>Uploads refusés</small><strong><%= metrics.uploadThreats %></strong><em>format, taille ou intégrité</em></div></article>
+</section>
+
+<section class="admin-card bot-shield-card" id="bot-shield">
+  <div class="admin-card-head bot-shield-head">
+    <div><p class="admin-kicker">Protection temps réel</p><h2>Bot Shield</h2><p>Les premières sondes reçoivent une 404. Le blocage temporaire n’arrive qu’après répétition ou cadence extrême.</p></div>
+    <span class="bot-shield-status <%= botShieldStats.enabled ? 'active' : 'inactive' %>"><i></i><%= botShieldStats.enabled ? 'Actif' : 'Désactivé' %></span>
+  </div>
+  <div class="bot-shield-live-grid">
+    <article><small>Sondes vues</small><strong><%= botShieldStats.totalProbes %></strong><span>depuis le redémarrage</span></article>
+    <article><small>Réponses bloquées</small><strong><%= botShieldStats.totalBlocked %></strong><span>scanner ou flood</span></article>
+    <article><small>Sources suivies</small><strong><%= botShieldStats.trackedSources %></strong><span>mémoire bornée</span></article>
+    <article><small>Bans actifs</small><strong><%= botShieldStats.activeBans %></strong><span>temporaires</span></article>
+    <article><small>Seuil scanner</small><strong><%= botShieldStats.maxStrikes %></strong><span>sondes avant blocage</span></article>
+    <article><small>Seuil flood</small><strong><%= botShieldStats.floodBan %></strong><span>requêtes/minute</span></article>
+  </div>
+  <div class="admin-table-wrap bot-shield-table-wrap">
+    <table class="admin-data-table bot-shield-table">
+      <thead><tr><th>Source</th><th>État</th><th>Signaux</th><th>Cadence</th><th>Dernière cible</th><th>Dernière vue</th><th>Action</th></tr></thead>
+      <tbody>
+        <% botShieldSources.forEach(source => { %><tr><td><code><%= source.sourceHash %></code></td><td><span class="security-severity <%= source.isBanned ? 'severity-critical' : 'severity-warning' %>"><%= source.isBanned ? 'Bloquée' : 'Surveillée' %></span><% if (source.isBanned) { %><small><%= Math.ceil(source.banRemainingSeconds / 60) %> min restantes</small><% } %></td><td><strong><%= source.strikes %>/<%= botShieldStats.maxStrikes %> sonde(s)</strong><small><%= source.probeCategories.join(', ') || source.banReason || 'cadence anormale' %></small></td><td><strong><%= source.requestsInWindow %></strong><small>fenêtre active</small></td><td><code><%= source.lastPath || '-' %></code></td><td><time><%= source.lastSeen %></time></td><td><% if (source.isBanned) { %><form action="/admin/securite/bot-shield/debloquer" method="POST"><input type="hidden" name="source_hash" value="<%= source.sourceHash %>"><button class="admin-text-button bot-shield-unban" type="submit">Débloquer</button></form><% } else { %><span class="muted">Automatique</span><% } %></td></tr><% }) %>
+        <% if (!botShieldSources.length) { %><tr><td colspan="7" class="admin-empty-line">Aucune sonde ou source anormale depuis le dernier démarrage.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <div class="security-overview-grid">
@@ -71,7 +95,7 @@
   </aside>
 </div>
 
-<section class="admin-card maintenance-control" id="maintenance">
+<% if (currentUser.role === 'developer') { %><section class="admin-card maintenance-control" id="maintenance">
   <div class="admin-card-head"><div><p class="admin-kicker">Communication publique</p><h2>État et maintenance</h2><p>Met à jour la page visible par tous sans exposer l’infrastructure.</p></div><a class="admin-text-button" href="/etat-du-service" target="_blank" rel="noopener">Voir la page publique</a></div>
   <form action="/developpeur/maintenance" method="POST" class="maintenance-form">
     <label>État actuel<select name="status"><option value="operational" <%= service.status === 'operational' ? 'selected' : '' %>>Opérationnel</option><option value="degraded" <%= service.status === 'degraded' ? 'selected' : '' %>>Service dégradé</option><option value="maintenance" <%= service.status === 'maintenance' ? 'selected' : '' %>>Maintenance en cours</option></select></label>
@@ -79,7 +103,7 @@
     <label class="maintenance-message-field">Message public<textarea name="message" maxlength="500" rows="3" placeholder="Explique brièvement l’impact et l’heure estimée de retour."><%= service.message %></textarea></label>
     <button class="admin-primary-action" type="submit"><span class="glyphicon glyphicon-check"></span>Publier l’état</button>
   </form>
-</section>
+</section><% } %>
 
 <aside class="security-scope-note"><strong>Limites de cette vue</strong><p>Elle couvre les événements de l’application <%= siteName %>. Elle ne remplace pas les journaux du VPS, du pare-feu, du reverse proxy, des sauvegardes ou de l’hébergeur, et ne peut pas prouver à elle seule l’absence d’une fuite de données.</p></aside>
 

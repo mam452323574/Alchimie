@@ -25,6 +25,7 @@ const { getServiceStatus, updateServiceStatus } = require('../utils/service-stat
 const { hashPasswordSync, passwordValidationError, verifyPasswordSync } = require('../utils/passwords');
 const { establishAuthenticatedSession, saveSession } = require('../utils/session');
 const { encryptionEnabled, lookupHash, revealEmail } = require('../utils/encryption');
+const botShield = require('../middleware/bot-shield');
 
 const router = express.Router();
 const safeSystemValue = (reader, fallback = null) => {
@@ -468,9 +469,10 @@ router.get('/developpeur/etat', requireAuth, requireRole('developer'), requireMo
   });
 });
 
-router.get('/developpeur/securite', requireAuth, requireRole('developer'), requireModerationAccess, (req, res) => {
+function renderSecurityDashboard(req, res) {
   const periods = { day: 1, week: 7, month: 30 };
-  const period = periods[req.query.periode] ? req.query.periode : 'week';
+  const requestedPeriod = String(req.query.periode || '');
+  const period = Object.hasOwn(periods, requestedPeriod) ? requestedPeriod : 'week';
   const modifier = `-${periods[period]} days`;
   const count = (where, ...parameters) => db.prepare(
     `SELECT COUNT(*) AS c FROM security_events WHERE created_at >= datetime('now', ?) ${where}`
@@ -479,9 +481,9 @@ router.get('/developpeur/securite', requireAuth, requireRole('developer'), requi
     events: count(''),
     critical: count("AND severity = 'critical'"),
     failedLogins: count("AND event_type IN ('login_failed','admin_unlock_failed','sanctioned_login_blocked')"),
-    sensitiveProbes: count("AND event_type = 'sensitive_probe'"),
-    accessDenied: count("AND event_type IN ('authorization_denied','moderation_session_locked')"),
-    serverErrors: count("AND event_type = 'server_error'"),
+    sensitiveProbes: count("AND event_type IN ('sensitive_probe','bot_probe','bot_ban','bot_flood_warning','bot_flood_ban')"),
+    botBlocks: count("AND event_type IN ('bot_ban','bot_flood_ban')"),
+    uploadThreats: count("AND event_type IN ('upload_invalid_file','upload_invalid_dimensions','upload_too_large','upload_integrity_mismatch','upload_csrf_failed')"),
   };
   const events = db.prepare(
     `SELECT security_events.*, users.username AS actor_name, users.role AS actor_role
@@ -508,11 +510,13 @@ router.get('/developpeur/securite', requireAuth, requireRole('developer'), requi
   ).all(modifier);
   const sessionSecret = process.env.SESSION_SECRET || '';
   const publicUrlIsHttps = /^https:\/\//i.test(process.env.SITE_URL || '');
+  const cookieIsSecure = process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true';
   const databaseMode = safeSystemValue(() => fs.statSync(db.name).mode & 0o777, null);
   const moderationUsesInitialPassword = safeSystemValue(
     () => verifyPasswordSync('1234', getModerationPasswordHash()),
     true
   );
+  const botShieldStats = botShield.getStats();
   const configurationChecks = [
     {
       label: 'Secret de session',
@@ -526,8 +530,8 @@ router.get('/developpeur/securite', requireAuth, requireRole('developer'), requi
     },
     {
       label: 'Cookie sécurisé HTTPS',
-      status: publicUrlIsHttps && process.env.COOKIE_SECURE !== 'true' ? 'critical' : (publicUrlIsHttps ? 'ok' : 'neutral'),
-      detail: publicUrlIsHttps ? (process.env.COOKIE_SECURE === 'true' ? 'Cookie Secure activé' : 'Cookie Secure inactif sur une URL HTTPS') : 'Contrôle non applicable à l’environnement local HTTP',
+      status: publicUrlIsHttps && !cookieIsSecure ? 'critical' : (publicUrlIsHttps ? 'ok' : 'neutral'),
+      detail: publicUrlIsHttps ? (cookieIsSecure ? 'Cookie Secure activé' : 'Cookie Secure inactif sur une URL HTTPS') : 'Contrôle non applicable à l’environnement local HTTP',
     },
     {
       label: 'Permissions de la base',
@@ -546,6 +550,9 @@ router.get('/developpeur/securite', requireAuth, requireRole('developer'), requi
     },
     { label: 'En-têtes de sécurité', status: 'ok', detail: 'Politique CSP et protections Helmet actives' },
     { label: 'Protection CSRF', status: 'ok', detail: 'Jeton de session et origine vérifiés sur toutes les écritures' },
+    { label: 'Bot Shield', status: botShieldStats.enabled ? 'ok' : 'critical', detail: botShieldStats.enabled ? 'Sondes et floods répétés bloqués progressivement' : 'Protection désactivée par la configuration' },
+    { label: 'Pipeline d’images', status: 'ok', detail: 'Décodage réel, réencodage WebP et métadonnées supprimées' },
+    { label: 'Paramètres entrants', status: 'ok', detail: 'Doublons ambigus, objets et clés d’injection refusés' },
     { label: 'Rotation des sessions', status: 'ok', detail: 'Identifiant renouvelé après authentification et élévation staff' },
     { label: 'Rétention des signaux', status: 'ok', detail: 'Suppression automatique après 90 jours' },
   ];
@@ -558,21 +565,50 @@ router.get('/developpeur/securite', requireAuth, requireRole('developer'), requi
     sensitive_probe: 'Sonde vers une ressource sensible', unexpected_method: 'Méthode HTTP inhabituelle',
     invalid_encoding: 'Encodage de requête invalide', server_error: 'Erreur serveur',
     request_too_large: 'Requête trop volumineuse',
+    malformed_parameters: 'Paramètres ambigus ou interdits',
+    bot_probe: 'Sonde automatisée détectée', bot_ban: 'Scanner temporairement bloqué',
+    bot_flood_warning: 'Cadence automatisée anormale', bot_flood_ban: 'Flood temporairement bloqué',
     csrf_failed: 'Protection CSRF déclenchée', global_rate_limit_reached: 'Limite globale atteinte',
     registration_rate_limit_reached: 'Limite d’inscriptions atteinte', account_rate_limit_reached: 'Compte ciblé par force brute',
     upload_capacity_reached: 'Capacité d’upload atteinte', upload_invalid_dimensions: 'Dimensions d’image refusées',
+    upload_invalid_file: 'Fichier d’image refusé', upload_too_large: 'Image source trop volumineuse',
+    upload_concurrency_reached: 'Traitements d’image simultanés refusés', upload_integrity_mismatch: 'Intégrité d’un média incohérente',
+    upload_csrf_failed: 'Upload refusé par la protection CSRF',
     privilege_changed: 'Modification de privilège', security_control_changed: 'Contrôle de sécurité modifié',
     service_status_changed: 'État du service modifié', security_dashboard_viewed: 'Tableau de sécurité consulté',
   };
   logSecurityEvent(req, {
     type: 'security_dashboard_viewed',
     severity: 'info',
-    details: 'Consultation de la fenêtre développeur de sécurité',
+    details: 'Consultation du Bot Shield et des signaux de sécurité',
   });
   res.render('developer/security', {
     metrics, events, trend, sourceActivity, configurationChecks, eventLabels,
-    period, service, pageTitle: 'Signaux de sécurité',
+    botShieldStats,
+    botShieldSources: botShield.getSourceDetails(),
+    period, service, pageTitle: 'Bot Shield et sécurité',
   });
+}
+
+router.get('/admin/securite', requireAuth, requireRole(...ADMIN_ROLES), requireModerationAccess, renderSecurityDashboard);
+
+router.get('/developpeur/securite', requireAuth, requireRole('developer'), requireModerationAccess, (req, res) => {
+  const requestedPeriod = ['day', 'week', 'month'].includes(req.query.periode) ? req.query.periode : '';
+  res.redirect(`/admin/securite${requestedPeriod ? `?periode=${requestedPeriod}` : ''}`);
+});
+
+router.post('/admin/securite/bot-shield/debloquer', requireAuth, requireRole(...ADMIN_ROLES), requireModerationAccess, (req, res) => {
+  const sourceHash = String(req.body.source_hash || '').toLowerCase();
+  const unblocked = /^[a-f0-9]{16}$/.test(sourceHash) && botShield.unbanSource(sourceHash);
+  logSecurityEvent(req, {
+    type: 'security_control_changed',
+    severity: 'warning',
+    details: unblocked ? `Source pseudonymisée ${sourceHash} débloquée` : 'Tentative de déblocage sans source active',
+  });
+  req.session.toast = unblocked
+    ? { type: 'success', message: 'La source a été débloquée du Bot Shield.' }
+    : { type: 'error', message: 'Cette source n’est plus bloquée ou n’existe pas.' };
+  res.redirect('/admin/securite#bot-shield');
 });
 
 router.post('/developpeur/maintenance', requireAuth, requireRole('developer'), requireModerationAccess, (req, res) => {
@@ -588,7 +624,7 @@ router.post('/developpeur/maintenance', requireAuth, requireRole('developer'), r
   });
   logModeration(req.user.id, null, 'service_status_changed', `État du service : ${service.label}`);
   req.session.toast = { type: 'success', message: 'La page publique d’état a été mise à jour.' };
-  res.redirect('/developpeur/securite#maintenance');
+  res.redirect('/admin/securite#maintenance');
 });
 
 router.post(

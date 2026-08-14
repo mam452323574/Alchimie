@@ -21,14 +21,14 @@ Références figées pour rendre l'audit reproductible :
 |---|---|---|---|
 | V1.2.4 | Requêtes SQL paramétrées | Requêtes `better-sqlite3` préparées dans `routes/`, `middleware/` et `utils/` | Revue de code |
 | V1.3.1 | Nettoyage du HTML non fiable | `utils/sanitize.js`, échappement EJS et liste blanche | Revue + test XSS |
-| V2.2.1 / V2.2.2 | Validation côté serveur | Limites et validation dans les routes, indépendamment du navigateur | Revue + tests négatifs |
-| V2.4.1 | Anti-automatisation | Limiteurs globaux, connexion, publication, upload et flux SSE | Revue + test 429 |
+| V2.2.1 / V2.2.2 | Validation côté serveur | Limites dans les routes et `middleware/input-guard.js` contre paramètres ambigus et clés d’injection | Revue + tests négatifs |
+| V2.4.1 | Anti-automatisation | Limiteurs globaux, connexion, publication, upload, flux SSE et Bot Shield progressif | Revue + tests 404/403/429 |
 | V3.3.1 à V3.3.4 | Cookie de session sûr | `HttpOnly`, `Secure`, `SameSite=Lax`, préfixe `__Host-` en production | `npm run audit:http` en HTTPS |
 | V3.4.1 | HSTS | Helmet et `deploy/nginx-avebar.conf` | `npm run security:check` |
 | V3.4.3 à V3.4.6 | CSP, `nosniff`, référent et anti-cadrage | Helmet dans `server.js` | `npm run audit:http` |
 | V3.5.1 | Protection CSRF | `middleware/csrf.js`, origine et jeton de session | Test d'écriture sans jeton |
 | V4.1.4 | Liste blanche des méthodes HTTP | GET, HEAD, POST et OPTIONS uniquement dans `server.js` | Test PUT/DELETE = 405 |
-| V5 | Uploads sûrs | Signature réelle, dimensions/pixels, 5 Mo, quotas et nom généré dans `routes/uploads.js` | Tests de fichiers invalides |
+| V5 | Uploads sûrs | Décodage raster et réencodage WebP dans `utils/image-upload.js`, métadonnées supprimées, limites dimensions/frames/5 Mo, concurrence bornée, quotas atomiques et nom généré | Tests HTML, SVG, polyglotte et surdimensionnement |
 | V6.2.1 | Politique de mot de passe | Validation et hachage bcrypt coût 12 dans l'authentification | Revue + test d'inscription |
 
 Les protections détaillées, le modèle de menace et les risques résiduels sont
@@ -40,11 +40,14 @@ Depuis une copie de préproduction avec les mêmes variables que le VPS :
 
 ```bash
 npm ci --omit=dev
+npm test
 npm run audit:local
 AUDIT_BASE_URL=https://votre-domaine.fr npm run audit:http
 ```
 
-`audit:local` vérifie notamment les dépendances connues vulnérables, les droits
+`npm test` couvre notamment les payloads XSS, les sinks EJS bruts, l’absence
+d’interpolation SQL depuis une requête, le Bot Shield, la pollution de paramètres
+et le réencodage des uploads. `audit:local` vérifie notamment les dépendances connues vulnérables, les droits
 des fichiers sensibles, l'intégrité et les clés étrangères SQLite, les index
 critiques, le mode WAL, ainsi que le durcissement Nginx/systemd. `audit:http`
 vérifie les en-têtes réellement observés et mesure les p50/p95. Les budgets sont
