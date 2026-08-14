@@ -2,13 +2,24 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('crypto');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
+
+const temporaryDatabaseRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'alchimie-security-hardening-'));
+process.env.DB_PATH = path.join(temporaryDatabaseRoot, 'forum.sqlite3');
+
 const botShieldModule = require('../middleware/bot-shield');
 const { inspectContainer } = require('../middleware/input-guard');
 const { cleanBody, formatPostBody, formatPrivateMessageBody } = require('../utils/sanitize');
 const { formatBio } = require('../utils/profile');
 
 const projectRoot = path.join(__dirname, '..');
+
+test.after(() => {
+  botShieldModule.close();
+  try { require('../db/database').close(); } catch (_error) { /* déjà fermé */ }
+  fs.rmSync(temporaryDatabaseRoot, { recursive: true, force: true });
+});
 
 function responseRecorder() {
   return {

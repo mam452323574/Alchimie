@@ -1,5 +1,21 @@
 process.umask(0o077);
+require('dotenv').config({ quiet: true });
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { performance } = require('perf_hooks');
+
+const projectRoot = path.join(__dirname, '..');
+let temporaryAuditRoot = '';
+const configuredDatabasePath = process.env.DB_PATH || path.join(projectRoot, 'db', 'forum.sqlite3');
+if (!fs.existsSync(configuredDatabasePath)) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(`Base de production absente : ${configuredDatabasePath}`);
+  }
+  temporaryAuditRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'alchimie-performance-check-'));
+  process.env.DB_PATH = path.join(temporaryAuditRoot, 'forum.sqlite3');
+}
+
 const db = require('../db/database');
 
 const failures = [];
@@ -79,6 +95,7 @@ for (const check of checks) {
 
 db.pragma('optimize');
 db.close();
+if (temporaryAuditRoot) fs.rmSync(temporaryAuditRoot, { recursive: true, force: true });
 if (failures.length) {
   console.error(`${failures.length} contrôle(s) de performance en échec.`);
   process.exitCode = 1;
