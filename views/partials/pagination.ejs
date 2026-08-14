@@ -1,0 +1,16 @@
+<% if (totalPages > 1) { %>
+<% const preservedPaginationQuery = typeof paginationQuery !== 'undefined'
+  ? paginationQuery
+  : (typeof search !== 'undefined' && search
+    ? 'q=' + encodeURIComponent(search) + '&scope=' + encodeURIComponent(searchScope)
+    : ''); %>
+<nav class="pagination">
+  <% for (let p = 1; p <= totalPages; p++) { %>
+    <% if (p === page) { %>
+      <span class="page-current"><%= p %></span>
+    <% } else { %>
+      <a href="?<%= preservedPaginationQuery ? preservedPaginationQuery + '&' : '' %>page=<%= p %>"><%= p %></a>
+    <% } %>
+  <% } %>
+</nav>
+<% } %>

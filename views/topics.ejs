@@ -1,0 +1,38 @@
+<%- include('partials/header') %>
+<div class="page-grid">
+  <section class="panel">
+    <div class="breadcrumb"><a href="/">Accueil</a> &nbsp;/&nbsp; Forum</div>
+    <div class="page-head">
+      <div><p class="eyebrow">Toutes les discussions</p><h1>Forum</h1></div>
+      <% if (currentUser && forums.length) { %><a class="btn" href="/f/<%= forums[0].slug %>/nouveau-sujet">Nouveau sujet</a><% } %>
+    </div>
+    <form class="topic-search" action="/forum" method="GET">
+      <label class="sr-only" for="topic-search">Rechercher un sujet</label>
+      <select name="scope" aria-label="Critère de recherche"><option value="title" <%= searchScope === 'title' ? 'selected' : '' %>>Titre uniquement</option><option value="author" <%= searchScope === 'author' ? 'selected' : '' %>>Auteur</option></select>
+      <input id="topic-search" type="search" name="q" value="<%= search %>" placeholder="<%= searchScope === 'author' ? 'Pseudo de l’auteur…' : 'Titre du sujet…' %>" maxlength="100">
+      <button class="btn-small" type="submit">Rechercher</button>
+      <% if (search) { %><a href="/forum">Effacer</a><% } %>
+    </form>
+    <table class="thread-table global-topics">
+      <thead><tr><th>Sujet</th><th class="num">Auteur</th><th class="num">Rép.</th><th class="hide-mobile">Forum</th><th class="hide-mobile">Dernier message</th></tr></thead>
+      <tbody>
+        <% threads.forEach(t => { %><tr class="<%= t.deleted_at ? 'thread-deleted' : '' %>">
+          <td><% if (t.deleted_at) { %><span class="badge badge-deleted">Supprimé</span><% } %><% if (t.is_pinned) { %><span class="pin-icon" title="Sujet épinglé">📌</span><% } %><% if (t.is_locked) { %><span class="badge badge-lock">Fermé</span><% } %><a class="thread-title" href="/t/<%= t.id %>"><%= t.title %></a><% if (t.deleted_at && moderationUnlocked) { %><form action="/t/<%= t.id %>/restaurer" method="POST" class="inline-form thread-restore"><button type="submit" class="restore-inline">Restaurer</button></form><% } %></td>
+          <td class="num"><a class="role-name-<%= t.author_role %>" href="/membre/<%= t.author_name %>"><%= t.author_name %></a></td>
+          <td class="num"><%= Math.max(0, t.post_count - 1) %></td>
+          <td class="hide-mobile"><a href="/f/<%= t.forum_slug %>"><%= t.forum_name %></a></td>
+          <td class="thread-meta hide-mobile"><%= t.last_post_at %></td>
+        </tr><% }) %>
+        <% if (!threads.length) { %><tr><td colspan="5" class="empty"><% if (search) { %>Aucun sujet ne correspond à <%= searchScope === 'author' ? 'l’auteur' : 'au titre' %> « <%= search %> ».<% } else { %>Aucun topic n’a encore été publié.<% } %></td></tr><% } %>
+      </tbody>
+    </table>
+    <%- include('partials/pagination') %>
+  </section>
+
+  <aside class="side-stack">
+    <section class="side-card"><h3>Catégories</h3><div class="forum-directory"><% categories.forEach(category => { %><div><strong><%= category.name %></strong><% forums.filter(forum => forum.category_id === category.id).forEach(forum => { %><a href="/f/<%= forum.slug %>"><%= forum.name %><span><%= forum.thread_count %></span></a><% }) %></div><% }) %><% if (!categories.length) { %><p class="side-note">Aucune catégorie créée pour le moment.</p><% } %></div></section>
+    <section class="side-card"><h3>Pages publiques</h3><div class="quick-links"><a href="/moderation">Modération</a><a href="/statistiques">Statistiques</a><a href="/etat-du-service">État du service</a><% if (currentUser) { %><a href="/mes-messages">Mes messages</a><% } %></div></section>
+    <%- include('partials/online-count') %>
+  </aside>
+</div>
+<%- include('partials/footer') %>

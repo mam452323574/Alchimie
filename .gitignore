@@ -1,0 +1,15 @@
+node_modules/
+.DS_Store
+**/.DS_Store
+.env
+.env.*
+!.env.example
+db/*.sqlite3
+db/*.sqlite3-wal
+db/*.sqlite3-shm
+db/sessions.sqlite3
+npm-debug.log*
+*.log
+storage/uploads/*
+!storage/uploads/.gitkeep
+backups/

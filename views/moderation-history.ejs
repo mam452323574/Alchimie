@@ -1,0 +1,15 @@
+<%- include('partials/header') %>
+<div class="page-grid">
+  <section class="panel">
+    <div class="page-head"><div><p class="eyebrow">Transparence</p><h1>Historique de modération</h1></div></div>
+    <p class="forum-intro">Les principales actions du staff sont consignées publiquement.</p>
+    <p class="moderation-result-count"><%= total %> action<%= total > 1 ? 's' : '' %></p>
+    <div class="public-log">
+      <% logs.forEach(log => { %><article class="log-entry log-entry-<%= log.tone %>"><span class="log-dot"></span><div><div><a class="role-name-<%= log.actor_role || 'member' %>" href="<%= log.actor_name ? '/membre/' + log.actor_name : '#' %>"><%= log.actor_name || 'Système' %></a> <strong><%= log.actionLabel %></strong><% if (log.target_name) { %> envers <a class="role-name-<%= log.target_role %>" href="/membre/<%= log.target_name %>"><%= log.target_name %></a><% } %></div><p><%= log.formattedDetails %></p><div class="log-entry-footer"><time><%= log.created_at %></time><% if (log.resource) { %><a class="log-resource-link" href="<%= log.resource.href %>"><%= log.resource.label %></a><% } %></div></div></article><% }) %>
+      <% if (!logs.length) { %><p class="empty">Aucune action de modération enregistrée.</p><% } %>
+    </div>
+    <%- include('partials/pagination') %>
+  </section>
+  <aside class="side-stack"><section class="side-card"><h3>Pages publiques</h3><div class="quick-links"><a href="/statistiques">Statistiques</a><a href="/">Forum</a><% if (currentUser) { %><a href="/mes-messages">Mes messages</a><% } %></div></section></aside>
+</div>
+<%- include('partials/footer') %>

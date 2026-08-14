@@ -1,0 +1,57 @@
+<%- include('partials/header') %>
+<div class="page-grid">
+  <section class="panel">
+    <div class="breadcrumb"><a href="/">Accueil</a> &nbsp;/&nbsp; <%= forum.name %></div>
+    <div class="page-head"><h1><%= forum.name %></h1></div>
+    <form class="topic-search" action="/f/<%= forum.slug %>" method="GET">
+      <label class="sr-only" for="topic-search">Rechercher un sujet</label>
+      <select name="scope" aria-label="Critère de recherche"><option value="title" <%= searchScope === 'title' ? 'selected' : '' %>>Titre</option><option value="author" <%= searchScope === 'author' ? 'selected' : '' %>>Auteur</option></select>
+      <input id="topic-search" type="search" name="q" value="<%= search %>" placeholder="<%= searchScope === 'author' ? 'Pseudo de l’auteur…' : 'Titre du sujet…' %>" maxlength="100">
+      <button class="btn-small topic-search-submit" type="submit" aria-label="Rechercher" title="Rechercher"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+      <% if (search) { %><a href="/f/<%= forum.slug %>">Effacer</a><% } %>
+    </form>
+    <table class="thread-table forum-topic-list">
+      <thead><tr><th>Sujet</th><th class="num">Auteur</th><th class="num">Rép.</th><th class="hide-mobile">Dernier message</th></tr></thead>
+      <tbody>
+        <% threads.forEach(t => { %>
+          <tr class="<%= t.deleted_at ? 'thread-deleted' : '' %> <%= t.unread_count ? 'thread-unread' : '' %> <%= t.is_black ? 'thread-black' : '' %>">
+            <td><% if (t.deleted_at) { %><span class="badge badge-deleted">Supprimé</span><% } %><% if (t.is_black) { %><span class="badge badge-black">Noir</span><% } %><% if (t.is_locked) { %><span class="badge badge-lock">Fermé</span><% } %><span class="topic-list-icon <%= t.is_pinned ? 'topic-pin glyphicon-pushpin' : 'topic-folder glyphicon-folder-close' %> <%= t.post_count > 20 ? 'topic-activity-hot' : 'topic-activity-standard' %> glyphicon" title="<%= t.is_pinned ? 'Sujet épinglé' : 'Sujet' %> - <%= t.post_count > 20 ? 'plus de 20 messages' : '20 messages ou moins' %>" aria-hidden="true"></span><a class="thread-title" href="<%= t.unread_count ? '/t/' + t.id + '?page=' + t.first_unread_page + '#post-' + t.first_unread_post_id : '/t/' + t.id %>"><%= t.title %></a><% if (t.deleted_at && moderationUnlocked) { %><form action="/t/<%= t.id %>/restaurer" method="POST" class="inline-form thread-restore"><button type="submit" class="restore-inline">Restaurer</button></form><% } %></td>
+            <td class="num"><a class="role-name-<%= t.author_role %>" href="/membre/<%= t.author_name %>"><%= t.author_name %></a></td><td class="num"><%= Math.max(0, t.post_count - 1) %></td><td class="thread-meta hide-mobile"><%= t.last_post_at %></td>
+          </tr>
+        <% }) %>
+        <% if (threads.length === 0) { %><tr><td colspan="4" class="empty"><%= search ? 'Aucun sujet ne correspond à cette recherche.' : 'Aucun sujet. Sois le premier à en créer un.' %></td></tr><% } %>
+      </tbody>
+    </table>
+    <%- include('partials/pagination') %>
+    <% if (currentUser) { %>
+      <section class="composer-shell inline-topic-composer" id="nouveau-sujet">
+        <div class="composer-heading"><div><p class="eyebrow"><%= forum.name %></p><h2>Nouveau sujet : <span class="role-name-<%= currentUser.role %>"><%= currentUser.username %></span></h2></div><span class="composer-pencil" aria-hidden="true">✎</span></div>
+
+        <% if (composerError) { %><p class="error notice"><%= composerError %></p><% } %>
+
+        <form action="/f/<%= forum.slug %>/nouveau-sujet" method="POST" class="topic-composer" data-editor-form data-upload-scope="public">
+          <label for="topic-title">Titre :</label>
+          <input id="topic-title" class="composer-title" type="text" name="title" maxlength="150" required value="<%= oldTitle %>" placeholder="Entrez le titre du topic" autocomplete="off">
+          <% if (canCreateBlackTopic) { %><label class="black-topic-option"><input type="checkbox" name="is_black" value="1" <%= oldIsBlack ? 'checked' : '' %>><span><strong>Topic noir</strong><small>Réservé aux membres de rang Bronze ou supérieur.</small></span></label><% } %>
+
+          <div class="editor-frame">
+            <%- include('partials/editor-toolbar') %>
+            <label class="sr-only" for="topic-body">Message du topic</label>
+            <textarea id="topic-body" name="body" rows="7" maxlength="20000" required placeholder="Message du topic" data-editor-input><%= oldBody %></textarea>
+          </div>
+
+          <section class="editor-preview" data-editor-preview hidden><p class="eyebrow">Prévisualisation</p><div data-editor-preview-content></div></section>
+
+          <div class="composer-actions"><button class="btn" type="submit">Envoyer</button><button class="btn btn-secondary" type="button" data-editor-preview-toggle>Prévisualiser</button></div>
+        </form>
+      </section>
+    <% } %>
+  </section>
+  <aside class="side-stack">
+    <% if (forum.slug === 'blabla') { %><section class="side-card"><h3>Autres forums</h3><div class="forum-directory"><div><% subForums.forEach(subForum => { %><a href="/f/<%= subForum.slug %>"><%= subForum.name %></a><% }) %><% if (!subForums.length) { %><p class="side-note">Aucun sous-forum disponible.</p><% } %></div></div></section><% } else { %><section class="side-card"><h3>Autres forums</h3><div class="forum-directory"><div><% if (mainForum) { %><a href="/f/<%= mainForum.slug %>"><%= mainForum.name %></a><% } %></div></div></section><% } %>
+    <section class="side-card"><div class="quick-links"><a href="/moderation">Modération</a><a href="/statistiques">Statistiques</a><a href="/etat-du-service">État du service</a><% if (currentUser) { %><a href="/mes-messages">Mes messages</a><a href="#nouveau-sujet">Créer un sujet</a><% } %></div></section>
+    <%- include('partials/online-count') %>
+  </aside>
+</div>
+<% if (currentUser) { %><script src="/js/editor.js" defer></script><% } %>
+<%- include('partials/footer') %>

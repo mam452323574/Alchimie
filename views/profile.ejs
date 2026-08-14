@@ -1,0 +1,31 @@
+<%- include('partials/header') %>
+<div class="profile-page-surface <%= profileUser.profile_bg_url ? 'profile-has-background' : '' %>" <% if (profileUser.profile_bg_url) { %>style="--profile-background-image:url('<%= profileUser.profile_bg_url %>')"<% } %>>
+  <section class="profile-cover">
+    <% if (currentUser && currentUser.id === profileUser.id) { %><a class="profile-settings-link" href="/compte" aria-label="Paramètres du compte" title="Paramètres du compte"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a><% } %>
+    <% if (youtubeEmbed) { %>
+      <div class="profile-music-player">
+        <button class="profile-music-toggle" type="button" aria-label="Lire la musique du profil" aria-pressed="false" title="Lire la musique du profil" data-profile-music-toggle>
+          <span class="glyphicon glyphicon-play music-icon-play" aria-hidden="true"></span>
+          <span class="glyphicon glyphicon-pause music-icon-pause" aria-hidden="true"></span>
+        </button>
+        <iframe class="profile-music-frame" id="profile-music-frame" data-src="<%= youtubeEmbed %>?enablejsapi=1&amp;controls=0&amp;rel=0&amp;playsinline=1" title="Lecteur audio du profil de <%= profileUser.username %>" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin" allow="autoplay; encrypted-media" tabindex="-1" aria-hidden="true"></iframe>
+      </div>
+    <% } %>
+    <div class="profile-identity">
+      <%- include('partials/avatar', { imageUrl: profileUser.avatar_url, imageClass: `profile-avatar-image ${avatarIsGif ? 'profile-avatar-gif' : ''}`, altText: `Avatar de ${profileUser.username}`, sanction: profileSanction?.type, sanctionUntil: profileSanction?.endsAt, wrapperClass: 'avatar-status-profile' }) %>
+      <div><div class="profile-name-row"><h1 class="username role-name-<%= profileUser.role %>"><%= profileUser.username %></h1><span class="role-badge role-badge-<%= profileUser.role %>"><%= roleLabels[profileUser.role] %></span><span class="rank-badge rank-<%= profileRank.key %>"><%= profileRank.label %></span></div><p><%= profileUser.message_count %> messages · <%= profileUser.points %> points · membre depuis le <%= profileUser.created_at.slice(0,10) %> (<span data-membership-days data-created-at="<%= profileUser.created_at %>"><%= membershipDays %> jour<%= membershipDays > 1 ? 's' : '' %></span>)</p><% if (profileSanction) { const showBanReason = profileSanction.type !== 'exclusion' && profileSanction.reason; %><div class="profile-sanction-box profile-sanction-<%= profileSanction.type === 'exclusion' ? 'exclusion' : 'ban' %>"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span><strong><%= profileSanction.type === 'exclusion' ? 'Exclu' : 'Banni' %><%= showBanReason ? ' :' : '' %></strong><% if (showBanReason) { %><span class="profile-sanction-reason">« <%= profileSanction.reason %> »</span><% } %><% if (profileSanction.type === 'exclusion' && profileSanction.endsAt) { %><small>Retour prévu le <%= profileSanction.endsAt %></small><% } %></div><% } %></div>
+    </div>
+  </section>
+
+  <div class="profile-content-grid">
+    <div class="profile-main-column">
+      <section class="profile-about panel"><p class="eyebrow">À propos</p><h2>Biographie</h2><div class="rich-bio"><%- formattedBio || '<span class="muted">Aucune biographie pour le moment.</span>' %></div><% if (profileUser.signature) { %><div class="post-signature"><%= profileUser.signature %></div><% } %></section>
+      <section class="panel profile-topics"><div class="profile-section-head"><div><p class="eyebrow">Activité</p><h2>Activité récente</h2></div><span><%= latestTopics.length %></span></div><ol class="profile-topic-list"><% latestTopics.forEach(topic => { %><li><div><% if (topic.is_pinned) { %><span aria-label="Épinglé">📌</span><% } %><a href="/t/<%= topic.id %>"><%= topic.title %></a><small><a href="/f/<%= topic.forum_slug %>"><%= topic.forum_name %></a> · <%= Math.max(0, topic.post_count - 1) %> réponse<%= Math.max(0, topic.post_count - 1) > 1 ? 's' : '' %></small></div><time><%= topic.created_at.slice(0, 10) %></time></li><% }) %><% if (!latestTopics.length) { %><li class="empty">Aucun topic publié pour le moment.</li><% } %></ol></section>
+    </div>
+    <aside class="profile-side">
+      <section class="side-card"><h3>Profil</h3><table class="profile-stats"><tr><td>Rôle</td><td><span class="role-badge role-badge-<%= profileUser.role %>"><%= roleLabels[profileUser.role] %></span></td></tr><tr><td>Rang</td><td><span class="rank-name rank-<%= profileRank.key %>"><%= profileRank.label %></span></td></tr><tr><td>Messages</td><td><%= profileUser.message_count %></td></tr><tr><td>Points</td><td><%= profileUser.points %></td></tr><tr><td>Inscription</td><td><%= profileUser.created_at.slice(0,10) %> (<span data-membership-days data-created-at="<%= profileUser.created_at %>"><%= membershipDays %> jour<%= membershipDays > 1 ? 's' : '' %></span>)</td></tr></table></section>
+    </aside>
+  </div>
+</div>
+<% if (youtubeEmbed) { %><script src="/js/profile-player.js" defer></script><% } %>
+<%- include('partials/footer') %>

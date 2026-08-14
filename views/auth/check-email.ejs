@@ -1,0 +1,10 @@
+<%- include('../partials/header') %>
+<section class="auth-card auth-result">
+  <span class="result-icon">✉</span>
+  <h1>Vérifie ta boîte mail</h1>
+  <p>Un lien de validation a été envoyé à <strong><%= email %></strong>. Le compte sera créé lorsque tu ouvriras ce lien.</p>
+  <% if (developmentUrl) { %>
+    <p class="dev-mail-note">Mode local : aucun serveur SMTP n’est configuré. <a href="<%= developmentUrl %>">Ouvrir le lien de validation</a>.</p>
+  <% } %>
+</section>
+<%- include('../partials/footer') %>

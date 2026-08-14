@@ -1,0 +1,8 @@
+<article class="post private-message" id="mp-<%= message.id %>">
+  <aside class="post-side">
+    <%- include('../partials/avatar', { imageUrl: message.avatar_url, imageClass: `post-avatar-image ${message.avatar_url && /\.gif(?:$|\?)/i.test(message.avatar_url) ? 'post-avatar-gif' : ''}`, altText: `Avatar de ${message.username}`, sanction: message.active_sanction, sanctionUntil: message.sanction_ends_at, wrapperClass: 'avatar-status-post' }) %>
+    <span class="post-count"><strong><%= message.message_count %></strong> messages publics</span><span class="post-points"><strong><%= message.points %></strong> points · <span class="rank-name rank-<%= rankForPoints(message.points).key %>"><%= rankForPoints(message.points).label %></span></span>
+    <span class="post-since">Inscrit le <%= message.user_created_at.slice(0,10) %></span>
+  </aside>
+  <div class="post-body"><div class="post-meta"><div class="post-meta-author"><a class="post-username role-name-<%= message.role %>" href="/membre/<%= message.username %>"><%= message.username %></a><span>Envoyé le <%= message.created_at %></span></div><div class="post-meta-controls"><a href="#mp-<%= message.id %>">#<%= message.id %></a></div></div><div class="post-content"><%- formatPrivateMessageBody(message.body) %></div></div>
+</article>

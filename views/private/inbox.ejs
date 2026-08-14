@@ -1,0 +1,18 @@
+<%- include('../partials/header') %>
+<div class="page-grid private-inbox-layout">
+  <section class="panel">
+    <div class="breadcrumb"><a href="/">Accueil</a> &nbsp;/&nbsp; Messages privés</div>
+    <div class="page-head"><div><p class="eyebrow">Espace personnel</p><h1>Messages privés</h1></div><a class="btn" href="/messages/nouveau">Nouveau MP</a></div>
+    <p class="forum-intro">Seuls les membres de chaque conversation peuvent l’ouvrir et y répondre.</p>
+    <table class="thread-table private-inbox-table">
+      <thead><tr><th>Titre du MP</th><th>Expéditeur</th><th class="hide-mobile">Participants</th><th class="num">Messages</th><th class="hide-mobile">Dernier message</th></tr></thead>
+      <tbody data-realtime-private-inbox><%- include('_inbox-rows', { conversations }) %></tbody>
+    </table>
+  </section>
+  <aside class="side-stack">
+    <section class="side-card"><h3>Confidentialité</h3><p class="side-note">Une conversation privée est inaccessible aux comptes qui n’en sont pas membres, même avec son adresse exacte.</p></section>
+    <section class="side-card"><h3>Groupes privés</h3><p class="side-note">Ajoute plusieurs pseudonymes à la création du MP. Jusqu’à 20 membres peuvent participer à une même conversation.</p></section>
+  </aside>
+</div>
+<script src="/js/realtime.js" defer></script>
+<%- include('../partials/footer') %>

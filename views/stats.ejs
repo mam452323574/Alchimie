@@ -1,0 +1,10 @@
+<%- include('partials/header') %>
+<section class="panel stats-page">
+  <div class="page-head"><div><p class="eyebrow">Données publiques</p><h1>Statistiques du forum</h1></div><div class="period-tabs"><a class="<%= period === 'week' ? 'active' : '' %>" href="?periode=week">Hebdomadaire</a><a class="<%= period === 'month' ? 'active' : '' %>" href="?periode=month">Mensuel</a><a class="<%= period === 'year' ? 'active' : '' %>" href="?periode=year">Annuel</a></div></div>
+  <div class="metric-grid"><article><span>Messages</span><strong><%= totals.posts %></strong><small>sur la période</small></article><article><span>Sujets / topics</span><strong><%= totals.threads %></strong><small>sur la période</small></article><article><span>Comptes créés</span><strong><%= totals.users %></strong><small><%= todayUsers %> aujourd’hui</small></article></div>
+  <div class="chart-legend"><span class="legend-posts">Messages</span><span class="legend-threads">Sujets</span><span class="legend-users">Comptes</span></div>
+  <div class="activity-chart <%= period === 'year' ? 'chart-year' : '' %>" aria-label="Activité par jour">
+    <% timeline.forEach((day, index) => { %><div class="chart-day" title="<%= day.day %> - <%= day.posts %> messages, <%= day.threads %> sujets, <%= day.users %> comptes"><div class="chart-bars"><i class="bar-posts" style="height:<%= Math.max(2, day.posts / maximum * 100) %>%"></i><i class="bar-threads" style="height:<%= Math.max(2, day.threads / maximum * 100) %>%"></i><i class="bar-users" style="height:<%= Math.max(2, day.users / maximum * 100) %>%"></i></div><time><%= (period !== 'year' || index % 30 === 0) ? day.day.slice(5) : '' %></time></div><% }) %>
+  </div>
+</section>
+<%- include('partials/footer') %>

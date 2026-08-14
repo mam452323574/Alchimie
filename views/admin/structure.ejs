@@ -1,0 +1,17 @@
+<%- include('../partials/header') %>
+<%- include('shell-start') %>
+
+<header class="admin-page-header">
+  <div><p class="admin-kicker">Configuration</p><h1>Structure du forum</h1><p>Organise les catégories et les forums accessibles à la communauté.</p></div>
+</header>
+
+<section class="admin-card">
+  <div class="admin-card-head"><div><p class="admin-kicker">Architecture éditoriale</p><h2>Catégories et forums</h2></div></div>
+  <div class="admin-structure-grid">
+    <div><h3>Catégories</h3><ul><% categories.forEach(c => { %><li><span><%= c.name %></span><form action="/admin/categories/<%= c.id %>/supprimer" method="POST"><button type="submit">Supprimer</button></form></li><% }) %></ul><form action="/admin/categories" method="POST" class="admin-inline-create"><input type="text" name="name" placeholder="Nouvelle catégorie" required><button type="submit">Ajouter</button></form></div>
+    <div><h3>Forums</h3><ul><% forums.forEach(f => { %><li><span><strong><%= f.name %></strong><small>/f/<%= f.slug %></small></span><form action="/admin/forums/<%= f.id %>/supprimer" method="POST"><button type="submit">Supprimer</button></form></li><% }) %></ul><form action="/admin/forums" method="POST" class="admin-forum-create"><select name="category_id" required><% categories.forEach(c => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %></select><input name="name" placeholder="Nom" required><input name="slug" placeholder="slug-url" required><input name="description" placeholder="Description"><button type="submit">Ajouter</button></form></div>
+  </div>
+</section>
+
+<%- include('shell-end') %>
+<%- include('../partials/footer') %>

@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+<section class="composer-shell">
+  <div class="breadcrumb"><a href="/">Accueil</a> &nbsp;/&nbsp; <a href="/f/<%= forum.slug %>"><%= forum.name %></a> &nbsp;/&nbsp; Nouveau sujet</div>
+  <div class="composer-heading"><div><p class="eyebrow"><%= forum.name %></p><h1>Nouveau sujet : <span class="role-name-<%= currentUser.role %>"><%= currentUser.username %></span></h1></div><span class="composer-pencil" aria-hidden="true">✎</span></div>
+
+  <% if (error) { %><p class="error notice"><%= error %></p><% } %>
+
+  <form action="/f/<%= forum.slug %>/nouveau-sujet" method="POST" class="topic-composer" data-editor-form data-upload-scope="public">
+    <label for="topic-title">Titre :</label>
+    <input id="topic-title" class="composer-title" type="text" name="title" maxlength="150" required value="<%= oldTitle %>" placeholder="Entrez le titre du topic" autocomplete="off">
+
+    <div class="editor-frame">
+      <%- include('partials/editor-toolbar') %>
+      <label class="sr-only" for="topic-body">Message du topic</label>
+      <textarea id="topic-body" name="body" rows="13" maxlength="20000" required placeholder="Message du topic" data-editor-input><%= oldBody %></textarea>
+    </div>
+
+    <section class="editor-preview" data-editor-preview hidden><p class="eyebrow">Prévisualisation</p><div data-editor-preview-content></div></section>
+
+    <div class="composer-actions"><button class="btn" type="submit">Envoyer</button><button class="btn btn-secondary" type="button" data-editor-preview-toggle>Prévisualiser</button></div>
+  </form>
+</section>
+
+<script src="/js/editor.js" defer></script>
+<%- include('partials/footer') %>

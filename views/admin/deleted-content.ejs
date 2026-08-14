@@ -1,0 +1,17 @@
+<%- include('../partials/header') %>
+<%- include('shell-start') %>
+
+<header class="admin-page-header">
+  <div><p class="admin-kicker">Contrôle qualité</p><h1>Contenus supprimés</h1><p>Consulte et restaure les topics ou messages masqués par l’équipe.</p></div>
+</header>
+
+<section class="admin-card admin-review-card">
+  <div class="admin-card-head"><div><p class="admin-kicker">File de révision</p><h2>Éléments restaurables</h2></div><span class="admin-count-chip"><%= deletedThreads.length + deletedPosts.length %> élément<%= deletedThreads.length + deletedPosts.length > 1 ? 's' : '' %></span></div>
+  <div class="admin-review-columns">
+    <div><h3>Topics supprimés</h3><div class="admin-review-list"><% deletedThreads.forEach(thread => { %><article><span class="glyphicon glyphicon-folder-close"></span><div><a href="/t/<%= thread.id %>"><%= thread.title %></a><small>par <%= thread.author_name %> - supprimé par <%= thread.deleted_by_name || 'Système' %><%= thread.deletion_reason ? ' - ' + thread.deletion_reason : '' %></small></div><form action="/t/<%= thread.id %>/restaurer" method="POST"><button type="submit">Restaurer</button></form></article><% }) %><% if (!deletedThreads.length) { %><p class="admin-empty-line">Aucun topic supprimé.</p><% } %></div></div>
+    <div><h3>Messages supprimés</h3><div class="admin-review-list"><% deletedPosts.forEach(post => { %><article><span class="glyphicon glyphicon-comment"></span><div><a href="/t/<%= post.thread_id %>#post-<%= post.id %>">Message #<%= post.id %></a><small><%= post.author_name %> dans « <%= post.thread_title %> »<%= post.deletion_reason ? ' - ' + post.deletion_reason : '' %></small></div><form action="/message/<%= post.id %>/restaurer" method="POST"><button type="submit">Restaurer</button></form></article><% }) %><% if (!deletedPosts.length) { %><p class="admin-empty-line">Aucun message supprimé.</p><% } %></div></div>
+  </div>
+</section>
+
+<%- include('shell-end') %>
+<%- include('../partials/footer') %>

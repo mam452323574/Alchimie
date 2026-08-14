@@ -1,0 +1,53 @@
+[Unit]
+Description=Alchimie Forum
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=avebar
+Group=avebar
+WorkingDirectory=/opt/avebar
+EnvironmentFile=/etc/avebar/avebar.env
+Environment=NODE_OPTIONS=--disable-proto=throw
+ExecStart=/usr/bin/node /opt/avebar/server.js
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=15s
+KillSignal=SIGTERM
+UMask=0077
+
+# Le code est en lecture seule ; seules la BDD, les sessions et les images sont modifiables.
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/avebar
+PrivateTmp=true
+PrivateDevices=true
+RemoveIPC=true
+KeyringMode=private
+NoNewPrivileges=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+LimitNOFILE=8192
+TasksMax=256
+IPAccounting=true
+
+[Install]
+WantedBy=multi-user.target

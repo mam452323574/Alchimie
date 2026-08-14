@@ -1,0 +1,24 @@
+<%- include('../partials/header') %>
+<section class="composer-shell private-composer">
+  <div class="breadcrumb"><a href="/">Accueil</a> &nbsp;/&nbsp; <a href="/messages">Messages privés</a> &nbsp;/&nbsp; Nouveau MP</div>
+  <div class="composer-heading"><div><p class="eyebrow">Conversation sécurisée</p><h1>Nouveau message privé</h1></div><span class="composer-pencil glyphicon glyphicon-envelope" aria-hidden="true"></span></div>
+  <% if (error) { %><p class="error notice"><%= error %></p><% } %>
+  <form action="/messages/nouveau" method="POST" class="topic-composer" data-editor-form data-upload-scope="private">
+    <input type="hidden" name="csrf_token" value="<%= privateMessageCsrfToken %>">
+    <label for="private-title">Titre du MP</label>
+    <input id="private-title" class="composer-title" type="text" name="title" maxlength="120" required value="<%= oldTitle %>" placeholder="Sujet de la conversation" autocomplete="off">
+    <label for="private-participants">Destinataires</label>
+    <input id="private-participants" class="composer-title" type="text" name="participants" maxlength="500" required value="<%= oldParticipants %>" placeholder="Pseudo1, Pseudo2, Pseudo3" list="private-usernames" autocomplete="off">
+    <datalist id="private-usernames"><% suggestedUsers.forEach(user => { %><option value="<%= user.username %>"><%= roleLabels[user.role] %></option><% }) %></datalist>
+    <p class="field-hint">Sépare les pseudonymes par une virgule pour créer un groupe privé. Ton compte est ajouté automatiquement.</p>
+    <div class="editor-frame">
+      <%- include('../partials/editor-toolbar') %>
+      <label class="sr-only" for="private-body">Premier message</label>
+      <textarea id="private-body" name="body" rows="11" maxlength="20000" required placeholder="Ton message privé..." data-editor-input><%= oldBody %></textarea>
+    </div>
+    <section class="editor-preview" data-editor-preview hidden><p class="eyebrow">Prévisualisation</p><div data-editor-preview-content></div></section>
+    <div class="composer-actions"><button class="btn" type="submit">Créer la conversation</button><button class="btn btn-secondary" type="button" data-editor-preview-toggle>Prévisualiser</button><a class="btn btn-secondary" href="/messages">Annuler</a></div>
+  </form>
+</section>
+<script src="/js/editor.js" defer></script>
+<%- include('../partials/footer') %>

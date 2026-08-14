@@ -1,0 +1,23 @@
+<%- include('partials/header') %>
+<div class="page-grid">
+  <section class="panel personal-messages-page">
+    <div class="breadcrumb"><a href="/">Accueil</a> &nbsp;/&nbsp; Mes messages</div>
+    <div class="page-head"><div><p class="eyebrow">Espace personnel</p><h1>Mes messages</h1></div></div>
+    <div class="personal-message-list">
+      <% messages.forEach(message => { %>
+        <article class="personal-message-entry">
+          <header><div><a href="/t/<%= message.thread_id %>?page=<%= message.threadPage %>#post-<%= message.id %>"><%= message.thread_title %></a><small><a href="/f/<%= message.forum_slug %>"><%= message.forum_name %></a> · message #<%= message.id %></small></div><time><%= message.created_at %></time></header>
+          <p><%= message.body.slice(0, 420) %><%= message.body.length > 420 ? '…' : '' %></p>
+          <a class="personal-message-open" href="/t/<%= message.thread_id %>?page=<%= message.threadPage %>#post-<%= message.id %>">Voir dans le topic <span aria-hidden="true">›</span></a>
+        </article>
+      <% }) %>
+      <% if (!messages.length) { %><p class="empty">Tu n’as encore publié aucun message visible.</p><% } %>
+    </div>
+    <%- include('partials/pagination') %>
+  </section>
+  <aside class="side-stack">
+    <section class="side-card"><h3>Navigation</h3><div class="quick-links"><a href="/f/blabla">Forum</a><a href="/messages">Messages privés</a><a href="/compte">Paramètres</a></div></section>
+    <%- include('partials/online-count') %>
+  </aside>
+</div>
+<%- include('partials/footer') %>

@@ -1,0 +1,17 @@
+<%- include('partials/header') %>
+
+<h1>Éditer le message</h1>
+
+<% if (error) { %><p class="error"><%= error %></p><% } %>
+
+<form action="/message/<%= post.id %>/editer" method="POST" class="topic-composer" data-editor-form data-upload-scope="public">
+  <div class="editor-frame">
+    <%- include('partials/editor-toolbar') %>
+    <textarea name="body" rows="10" maxlength="20000" required data-editor-input><%= post.body %></textarea>
+  </div>
+  <section class="editor-preview" data-editor-preview hidden><p class="eyebrow">Prévisualisation</p><div data-editor-preview-content></div></section>
+  <div class="composer-actions"><button class="btn" type="submit">Enregistrer</button><button class="btn btn-secondary" type="button" data-editor-preview-toggle>Prévisualiser</button></div>
+</form>
+
+<script src="/js/editor.js" defer></script>
+<%- include('partials/footer') %>

@@ -1,0 +1,6 @@
+<%- include('../partials/header') %>
+<section class="auth-card auth-result">
+  <% if (error) { %><span class="result-icon result-error">!</span><h1>Validation impossible</h1><p class="error"><%= error %></p><a class="btn" href="/inscription">Recommencer</a>
+  <% } else { %><span class="result-icon">✓</span><h1>Compte validé</h1><p>Ton adresse e-mail est confirmée et ton compte est maintenant actif.</p><a class="btn" href="/">Entrer sur le forum</a><% } %>
+</section>
+<%- include('../partials/footer') %>

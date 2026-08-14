@@ -1,0 +1,12 @@
+<%
+  const displayedAvatar = imageUrl || '/images/default-avatar.jpeg';
+  const displayedSanction = sanction || '';
+  const sanctionLabel = displayedSanction === 'exclusion' ? 'Exclu' : 'Banni';
+  const sanctionTitle = displayedSanction === 'exclusion' && sanctionUntil
+    ? `${sanctionLabel} jusqu’au ${sanctionUntil}`
+    : sanctionLabel;
+%>
+<span class="avatar-status <%= wrapperClass || '' %>">
+  <img class="<%= imageClass || '' %>" src="<%= displayedAvatar %>" alt="<%= altText || '' %>">
+  <% if (displayedSanction) { %><span class="avatar-sanction-mark" role="img" aria-label="<%= sanctionTitle %>" title="<%= sanctionTitle %>"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span></span><% } %>
+</span>

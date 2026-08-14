@@ -1,0 +1,35 @@
+<%- include('../partials/header') %>
+<%- include('../admin/shell-start') %>
+
+<header class="admin-page-header">
+  <div><p class="admin-kicker">Accès développeur</p><h1>État du service</h1><p>Supervision en lecture seule du processus <%= siteName %> et de son environnement.</p></div>
+  <span class="admin-service-status service-<%= service.status %>"><i></i><%= service.label %></span>
+</header>
+
+<section class="admin-metric-grid developer-admin-metrics">
+  <article><span class="admin-metric-icon metric-blue glyphicon glyphicon-user"></span><div><small>Comptes</small><strong><%= counts.users %></strong><em><%= technical.online %> en ligne</em></div></article>
+  <article><span class="admin-metric-icon metric-violet glyphicon glyphicon-folder-open"></span><div><small>Topics visibles</small><strong><%= counts.threads %></strong><em>contenus actifs</em></div></article>
+  <article><span class="admin-metric-icon metric-online glyphicon glyphicon-comment"></span><div><small>Messages visibles</small><strong><%= counts.posts %></strong><em>hors suppressions</em></div></article>
+  <article><span class="admin-metric-icon metric-orange glyphicon glyphicon-ban-circle"></span><div><small>Sanctions actives</small><strong><%= counts.sanctions %></strong><em>contrôles en cours</em></div></article>
+  <article><span class="admin-metric-icon metric-slate glyphicon glyphicon-time"></span><div><small>Processus</small><strong><%= Math.floor(technical.processUptime / 60) %> min</strong><em>depuis le démarrage</em></div></article>
+  <article><span class="admin-metric-icon metric-red glyphicon glyphicon-hdd"></span><div><small>Base SQLite</small><strong><%= (technical.databaseBytes / 1024 / 1024).toFixed(2) %> Mo</strong><em><%= technical.nodeVersion %></em></div></article>
+</section>
+
+<div class="developer-control-grid">
+  <section class="admin-card"><div class="admin-card-head"><div><p class="admin-kicker">Surveillance temps réel</p><h2>Moniteur du service</h2></div><span class="admin-count-chip">Actualisation 5 s</span></div><div class="admin-terminal"><div><span></span><span></span><span></span><strong><%= siteName %> / état lecture seule</strong></div><pre id="server-terminal">Connexion au moniteur sécurisé...</pre></div></section>
+  <aside class="admin-card"><div class="admin-card-head"><div><p class="admin-kicker">Accès rapide</p><h2>Outils</h2></div></div><div class="developer-quick-links"><a href="/developpeur/securite" target="_blank" rel="noopener"><span class="glyphicon glyphicon-lock"></span><div><strong>Signaux de sécurité</strong><small>Ouvrir le tableau réservé aux développeurs</small></div></a><a href="/admin/membres"><span class="glyphicon glyphicon-user"></span><div><strong>Permissions</strong><small>Nommer les modérateurs et administrateurs</small></div></a><a href="/admin/sanctions"><span class="glyphicon glyphicon-ban-circle"></span><div><strong>Sanctions</strong><small>Suivre les accès suspendus</small></div></a><a href="/admin/contenus-supprimes"><span class="glyphicon glyphicon-trash"></span><div><strong>Contenus supprimés</strong><small>Contrôler et restaurer</small></div></a></div><div class="admin-card-head developer-log-head"><div><p class="admin-kicker">Traçabilité</p><h2>Dernières actions</h2></div></div><ol class="admin-audit-list compact"><% logs.slice(0,8).forEach(log => { %><li><span class="admin-audit-icon glyphicon glyphicon-check"></span><div><strong><%= log.actor_name || 'Système' %></strong><p><%= log.details || log.action %></p><time><%= log.created_at %></time></div></li><% }) %></ol></aside>
+</div>
+
+<section class="admin-card developer-security-card" id="securite">
+  <div class="admin-card-head"><div><p class="admin-kicker">Sécurité</p><h2>Mot de passe du centre de contrôle</h2></div><span class="admin-count-chip">Développeurs uniquement</span></div>
+  <form class="developer-password-form" action="/developpeur/mot-de-passe-moderation" method="POST">
+    <label>Mot de passe actuel<input type="password" name="current_password" autocomplete="current-password" required></label>
+    <label>Nouveau mot de passe<input type="password" name="new_password" minlength="12" maxlength="72" autocomplete="new-password" required></label>
+    <label>Confirmation<input type="password" name="password_confirmation" minlength="12" maxlength="72" autocomplete="new-password" required></label>
+    <button class="admin-primary-action" type="submit"><span class="glyphicon glyphicon-lock"></span>Mettre à jour</button>
+  </form>
+</section>
+
+<script src="/js/developer.js" defer></script>
+<%- include('../admin/shell-end') %>
+<%- include('../partials/footer') %>

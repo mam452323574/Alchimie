@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+
+<section class="hero">
+  <h1>Bienvenue sur <%= siteName %></h1>
+  <div class="hero-copy">
+    <p><%= siteName %> est un espace de discussion fondé sur une expression plus libre, des échanges directs et une modération lisible. L’objectif est de laisser vivre les débats et les sensibilités différentes dans le respect de la loi et des autres membres.</p>
+    <p>La communauté veut construire une alternative indépendante, solide et viable aux forums 18-25 et aux autres JVC-likes : un lieu simple, durable et proche de ses utilisateurs.</p>
+  </div>
+  <div class="stats-bar" aria-label="Statistiques du forum">
+    <span><strong><%= stats.users %></strong> membres</span>
+    <span><strong><%= stats.threads %></strong> sujets</span>
+    <span><strong><%= stats.posts %></strong> messages</span>
+  </div>
+</section>
+
+<div class="page-grid" id="forums">
+  <div>
+    <% categories.forEach(cat => { %>
+      <section class="category-block">
+        <h2 class="category-title"><%= cat.name %></h2>
+        <table class="forum-table">
+          <thead><tr><th>Forum</th><th class="num">Sujets</th><th class="num">Messages</th></tr></thead>
+          <tbody>
+            <% forumsByCategory[cat.id].forEach(f => { %>
+              <tr>
+                <td><div class="forum-cell"><div><a class="forum-name" href="/f/<%= f.slug %>"><%= f.name %></a><p class="forum-desc"><%= f.description %></p></div></div></td>
+                <td class="num"><%= f.thread_count %></td><td class="num"><%= f.post_count %></td>
+              </tr>
+            <% }) %>
+            <% if (forumsByCategory[cat.id].length === 0) { %><tr><td colspan="3" class="empty">Aucun forum dans cette catégorie.</td></tr><% } %>
+          </tbody>
+        </table>
+      </section>
+    <% }) %>
+    <% if (categories.length === 0) { %><p class="empty">Aucune catégorie pour le moment.</p><% } %>
+  </div>
+  <aside class="side-stack">
+    <section class="side-card">
+      <h3>Accès rapide</h3>
+      <div class="quick-links">
+        <% categories.forEach(cat => { forumsByCategory[cat.id].slice(0, 3).forEach(f => { %><a href="/f/<%= f.slug %>"><%= f.name %></a><% }) }) %>
+        <a href="/moderation">Modération</a><a href="/statistiques">Statistiques</a><a href="/etat-du-service">État du service</a><% if (currentUser) { %><a href="/mes-messages">Mes messages</a><% } %>
+      </div>
+    </section>
+    <%- include('partials/online-count') %>
+  </aside>
+</div>
+
+<%- include('partials/footer') %>

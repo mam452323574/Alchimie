@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+<section class="topic-panel <%= thread.deleted_at ? 'topic-deleted' : '' %> <%= thread.is_black ? 'topic-black' : '' %>" data-realtime-thread data-thread-id="<%= thread.id %>" data-current-page="<%= page %>" data-total-pages="<%= totalPages %>" data-last-message-id="<%= posts.length ? posts[posts.length - 1].id : 0 %>">
+  <div class="breadcrumb"><a href="/">Accueil</a> &nbsp;/&nbsp; <a href="/f/<%= forum.slug %>"><%= forum.name %></a> &nbsp;/&nbsp; <%= thread.title %></div>
+  <div class="page-head topic-heading"><h1>Topic : « <%= thread.title %> »</h1><% if (thread.is_black) { %><span class="badge badge-black">Topic noir</span><% } %><% if (thread.is_pinned) { %><span class="topic-pinned">📌 Épinglé</span><% } %></div>
+  <% if (thread.deleted_at) { %><div class="deleted-notice"><strong>Topic supprimé</strong><span>Masqué le <%= thread.deleted_at %><%= thread.deleted_by_name ? ' par ' + thread.deleted_by_name : '' %><%= thread.deletion_reason ? ' - ' + thread.deletion_reason : '' %></span></div><% } %>
+  <div class="toolbar">
+    <% if (currentUser && !thread.is_locked && !thread.deleted_at) { %><a class="btn" href="#bas">Répondre</a><% } %><a class="btn btn-secondary" href="/f/<%= forum.slug %>">Liste des sujets</a>
+    <% if (currentUser) { %><form action="/t/<%= thread.id %>/<%= isFollowing ? 'ne-plus-suivre' : 'suivre' %>" method="POST" class="inline-form"><input type="hidden" name="page" value="<%= page %>"><button class="btn <%= isFollowing ? 'btn-secondary' : '' %>" type="submit"><span class="glyphicon <%= isFollowing ? 'glyphicon-eye-close' : 'glyphicon-eye-open' %>" aria-hidden="true"></span> <%= isFollowing ? 'Ne plus suivre' : 'Suivre' %></button></form><% } %>
+    <% if (firstUnread) { %><a class="btn btn-unread" href="?page=<%= firstUnread.page %>#post-<%= firstUnread.postId %>"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Premier non lu</a><% } %>
+    <% if (!thread.deleted_at && moderationUnlocked && ['moderator','admin','developer'].includes(currentUser.role)) { %><form action="/t/<%= thread.id %>/epingler" method="POST" class="inline-form"><button class="btn" type="submit"><%= thread.is_pinned ? 'Désépingler' : 'Épingler' %></button></form><% } %><% if (!thread.deleted_at && moderationUnlocked && ['admin','developer'].includes(currentUser.role)) { %><form action="/t/<%= thread.id %>/verrouiller" method="POST" class="inline-form"><button class="btn" type="submit"><%= thread.is_locked ? 'Déverrouiller' : 'Verrouiller' %></button></form><% } %>
+    <% if (thread.deleted_at && moderationUnlocked) { %><form action="/t/<%= thread.id %>/restaurer" method="POST" class="inline-form"><button class="btn restore-btn" type="submit">Restaurer le topic</button></form><% } else if (currentUser && (currentUser.id === thread.user_id || (moderationUnlocked && ['admin','developer'].includes(currentUser.role)))) { %><form action="/t/<%= thread.id %>/supprimer" method="POST" class="inline-form"><button class="btn delete-btn" type="submit">Supprimer le topic</button></form><% } %>
+  </div>
+  <%- include('partials/pagination') %>
+  <a class="realtime-new-message" href="#" data-realtime-new-message hidden></a>
+  <div data-realtime-message-list><%- include('partials/public-post-list', { posts, pollsByPost, thread }) %></div>
+  <%- include('partials/pagination') %>
+  <div class="typing-indicator" data-typing-indicator hidden aria-live="polite"><span data-typing-text></span><span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+</section>
+
+<a id="bas"></a>
+<% if (currentUser && !thread.is_locked && !thread.deleted_at) { %>
+  <form action="/t/<%= thread.id %>/repondre" method="POST" class="reply-form" data-editor-form data-upload-scope="public" data-realtime-public-reply>
+    <div class="reply-head"><h3>Répondre</h3><button class="btn-small btn-secondary" type="button" data-poll-toggle>＋ Ajouter un sondage</button></div>
+    <input type="hidden" name="reply_to_post_id" value="" data-reply-target-input>
+    <div class="reply-target" data-reply-target hidden><span>Réponse à <strong data-reply-target-name></strong> · message <span data-reply-target-number></span></span><button type="button" data-reply-cancel aria-label="Annuler la réponse ciblée">×</button></div>
+    <div class="editor-frame reply-editor-frame">
+      <%- include('partials/editor-toolbar') %>
+      <textarea name="body" rows="7" maxlength="20000" required placeholder="Ton message..." data-reply-textarea data-editor-input></textarea>
+    </div>
+    <section class="editor-preview" data-editor-preview hidden><p class="eyebrow">Prévisualisation</p><div data-editor-preview-content></div></section>
+    <fieldset class="poll-fields" id="poll-fields" hidden><legend>Sondage joint à ce message</legend><label>Question</label><input type="text" name="poll_question" maxlength="180" placeholder="Quelle est ta question ?"><label>Réponses possibles - une par ligne</label><textarea name="poll_options" rows="5" maxlength="1000" placeholder="Option 1\nOption 2"></textarea><p class="field-hint">De 2 à 10 réponses. Le sondage sera rattaché à ce message uniquement.</p></fieldset>
+    <div class="composer-actions"><button class="btn" type="submit">Envoyer</button><button class="btn btn-secondary" type="button" data-editor-preview-toggle>Prévisualiser</button></div>
+    <p class="realtime-form-feedback" data-realtime-form-feedback hidden></p>
+  </form>
+<% } else if (thread.deleted_at) { %><p class="empty">Ce sujet est supprimé. Le staff peut encore consulter son contenu ou le restaurer.</p><% } else if (thread.is_locked) { %><p class="empty">Ce sujet est verrouillé.</p><% } else { %><p class="empty"><a href="/connexion">Connecte-toi</a> pour répondre.</p><% } %>
+
+<% if (moderationUnlocked) { %><%- include('partials/sanction-dialog') %><% } %>
+<script src="/js/forum.js" defer></script>
+<script src="/js/editor.js" defer></script>
+<script src="/js/realtime.js" defer></script>
+<%- include('partials/footer') %>

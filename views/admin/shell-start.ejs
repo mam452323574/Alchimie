@@ -1,0 +1,26 @@
+<div class="admin-workspace">
+  <aside class="admin-rail">
+    <a class="admin-brand" href="/admin"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span><span><strong><%= siteName %></strong><small>Centre de contrôle</small></span></a>
+    <nav class="admin-navigation" aria-label="Navigation du back-office">
+      <p>Pilotage</p>
+      <a class="<%= path === '/admin' ? 'active' : '' %>" href="/admin"><span class="glyphicon glyphicon-th-large"></span>Vue d’ensemble</a>
+      <a class="<%= path === '/admin/membres' ? 'active' : '' %>" href="/admin/membres"><span class="glyphicon glyphicon-user"></span>Membres</a>
+      <a class="<%= path === '/admin/sanctions' ? 'active' : '' %>" href="/admin/sanctions"><span class="glyphicon glyphicon-ban-circle"></span>Sanctions</a>
+      <a class="<%= path === '/admin/contenus-supprimes' ? 'active' : '' %>" href="/admin/contenus-supprimes"><span class="glyphicon glyphicon-trash"></span>Contenus supprimés</a>
+      <% if (currentUser.role === 'admin' || currentUser.role === 'developer') { %><a class="<%= path === '/admin/structure' ? 'active' : '' %>" href="/admin/structure"><span class="glyphicon glyphicon-folder-open"></span>Structure du forum</a><% } %>
+      <% if (currentUser.role === 'developer') { %><p>Technique</p><a class="<%= path === '/developpeur' ? 'active' : '' %>" href="/developpeur"><span class="glyphicon glyphicon-hdd"></span>État du service</a><a class="<%= path === '/developpeur/securite' ? 'active' : '' %>" href="/developpeur/securite" target="_blank" rel="noopener"><span class="glyphicon glyphicon-lock"></span>Signaux de sécurité</a><% } %>
+      <p>Liens utiles</p>
+      <a href="/moderation"><span class="glyphicon glyphicon-list-alt"></span>Journal public</a>
+      <a href="/statistiques"><span class="glyphicon glyphicon-stats"></span>Statistiques</a>
+      <a href="/etat-du-service"><span class="glyphicon glyphicon-signal"></span>Page d’état publique</a>
+      <a href="/forum"><span class="glyphicon glyphicon-new-window"></span>Retour au forum</a>
+    </nav>
+    <div class="admin-identity">
+      <img src="<%= currentUser.avatar_url || '/images/default-avatar.jpeg' %>" alt="Avatar de <%= currentUser.username %>">
+      <div><strong class="role-name-<%= currentUser.role %>"><%= currentUser.username %></strong><small><%= roleLabels[currentUser.role] %></small></div>
+      <form action="/deconnexion" method="POST"><button type="submit" aria-label="Déconnexion" title="Déconnexion"><span class="glyphicon glyphicon-log-out"></span></button></form>
+    </div>
+  </aside>
+  <section class="admin-stage">
+    <header class="admin-topbar"><div><span class="admin-secure-dot"></span>Session sécurisée</div><div class="admin-topbar-actions"><time><%= new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) %></time><form action="/admin/verrouiller" method="POST"><button class="admin-lock-button" type="submit"><span class="glyphicon glyphicon-lock"></span>Verrouiller</button></form></div></header>
+    <div class="admin-stage-content">

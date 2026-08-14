@@ -1,0 +1,8 @@
+<% conversations.forEach(conversation => { %><tr class="<%= conversation.unread_count ? 'private-row-unread' : '' %>">
+  <td><% if (conversation.unread_count) { %><span class="private-unread-label">Nouveau</span><% } %><a class="thread-title private-thread-title" href="/messages/<%= conversation.id %>"><%= conversation.title %></a><% if (conversation.unread_count) { %><small><%= conversation.unread_count %> non lu<%= conversation.unread_count > 1 ? 's' : '' %></small><% } %></td>
+  <td><span class="role-name-<%= conversation.last_sender_role %>"><%= conversation.last_sender_name %></span></td>
+  <td class="hide-mobile private-members-cell"><%= conversation.other_members || 'Conversation personnelle' %></td>
+  <td class="num"><%= conversation.message_count %></td>
+  <td class="thread-meta hide-mobile"><%= conversation.last_message_at %></td>
+</tr><% }) %>
+<% if (!conversations.length) { %><tr><td colspan="5" class="empty">Ta boîte de réception est vide. Tu peux créer une conversation privée individuelle ou de groupe.</td></tr><% } %>

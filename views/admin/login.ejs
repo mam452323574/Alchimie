@@ -1,0 +1,18 @@
+<%- include('../partials/header') %>
+<section class="admin-gate-page">
+  <div class="admin-gate-card">
+    <span class="admin-gate-icon glyphicon glyphicon-lock" aria-hidden="true"></span>
+    <p class="admin-kicker">Accès réservé au staff</p>
+    <h1>Déverrouiller le centre de contrôle</h1>
+    <p class="admin-gate-intro">Ton rôle autorise cette connexion, mais le mot de passe de modération reste nécessaire pour afficher et utiliser les outils sensibles.</p>
+    <% if (error) { %><p class="admin-gate-error" role="alert"><%= error %></p><% } %>
+    <form class="admin-gate-form" action="/admin/connexion" method="POST">
+      <input type="hidden" name="return_to" value="<%= returnTo %>">
+      <label for="moderation-password">Mot de passe du centre de contrôle</label>
+      <input id="moderation-password" type="password" name="password" autocomplete="current-password" required autofocus>
+      <button class="admin-gate-submit" type="submit">Accéder aux outils</button>
+    </form>
+    <div class="admin-gate-footer"><span>La session sensible expire rapidement et devra être déverrouillée à nouveau.</span><a href="/forum">Retour au forum</a></div>
+  </div>
+</section>
+<%- include('../partials/footer') %>

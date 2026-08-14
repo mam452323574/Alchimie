@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#171819">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' - ' + siteName : siteName %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="<%= path.startsWith('/admin') || path.startsWith('/developpeur') ? 'backoffice-body' : '' %>">
+<form id="csrf-token-carrier" hidden aria-hidden="true"><input type="hidden" name="csrf_token" value="<%= csrfToken %>"></form>
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand-nav">
+      <a class="logo" href="/"><span class="logo-first"><%= siteName.slice(0, Math.ceil(siteName.length / 2)) %></span><span class="logo-mark"><%= siteName.slice(Math.ceil(siteName.length / 2)) %></span></a>
+      <button class="mobile-menu-toggle" type="button" aria-label="Ouvrir le menu" aria-controls="primary-navigation user-navigation" aria-expanded="false" data-mobile-menu-toggle><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+      <nav class="main-nav" id="primary-navigation" aria-label="Navigation principale">
+        <a class="<%= path === '/' ? 'active' : '' %>" href="/">Accueil</a>
+        <a class="<%= path === '/forum' || path.startsWith('/f/') || path.startsWith('/t/') ? 'active' : '' %>" href="/f/blabla">Forum</a>
+        <% if (currentUser && ['developer', 'admin', 'moderator'].includes(currentUser.role)) { %>
+          <a class="<%= path.startsWith('/admin') ? 'active' : '' %>" href="/admin">Admin</a>
+        <% } %>
+      </nav>
+    </div>
+    <nav class="user-nav" id="user-navigation" aria-label="Compte utilisateur">
+      <% if (currentUser) { %>
+        <div class="notification-center">
+          <button class="nav-icon notification-trigger" type="button" aria-label="Notifications" aria-expanded="false" data-notification-trigger><span class="glyphicon glyphicon-bell" aria-hidden="true"></span><% if (unreadNotifications > 0) { %><span class="notification-count" data-notification-count><%= unreadNotifications > 99 ? '99+' : unreadNotifications %></span><% } %></button>
+          <section class="notification-popover" data-notification-popover hidden>
+            <div class="notification-popover-head"><strong>Notifications</strong><span><%= unreadNotifications %> nouvelle<%= unreadNotifications > 1 ? 's' : '' %></span></div>
+            <div class="notification-list">
+              <% recentNotifications.forEach(notification => { %><a class="notification-item <%= notification.is_read ? '' : 'notification-new' %>" href="/t/<%= notification.thread_id %>?page=<%= notification.thread_page || 1 %>#post-<%= notification.post_id || '' %>"><%- include('avatar', { imageUrl: notification.actor_avatar_url, imageClass: 'mini-avatar mini-avatar-image notification-avatar', altText: '', sanction: notification.actor_active_sanction, sanctionUntil: notification.actor_sanction_ends_at, wrapperClass: 'avatar-status-notification' }) %><span><strong class="role-name-<%= notification.actor_role %>"><%= notification.actor_name %></strong> <%= notification.kind === 'follow' ? 'a publié un message dans le topic suivi' : 'a répondu à ton message dans' %> « <%= notification.thread_title %> ».<time><%= notification.created_at %></time></span></a><% }) %>
+              <% if (!recentNotifications.length) { %><p class="notification-empty">Aucune notification récente.</p><% } %>
+            </div>
+          </section>
+        </div>
+        <a class="user-chip" href="/membre/<%= currentUser.username %>">
+          <img class="mini-avatar mini-avatar-image" src="<%= currentUser.avatar_url || '/images/default-avatar.jpeg' %>" alt="Avatar de <%= currentUser.username %>">
+          <span class="role-name-<%= currentUser.role %>"><%= currentUser.username %></span>
+        </a>
+        <a class="nav-icon private-message-link <%= unreadPrivateMessages > 0 ? 'private-message-unread' : '' %> <%= path.startsWith('/messages') ? 'active' : '' %>" href="/messages" title="Messages privés" aria-label="Messages privés<%= unreadPrivateMessages ? ' - ' + unreadPrivateMessages + ' conversation(s) non lue(s)' : '' %>" data-private-message-link><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span></a>
+        <a class="nav-icon <%= path === '/compte' ? 'active' : '' %>" href="/compte" title="Paramètres" aria-label="Paramètres"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
+        <form action="/deconnexion" method="POST" class="inline-form">
+          <button type="submit" class="link-btn nav-icon" title="Déconnexion" aria-label="Déconnexion"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span></button>
+        </form>
+      <% } else { %>
+        <a href="/connexion">Connexion</a>
+        <a class="btn-small" href="/inscription">Inscription</a>
+      <% } %>
+    </nav>
+  </div>
+</header>
+<% if (toast) { %><div class="toast toast-<%= toast.type || 'success' %>" role="status" data-toast><span><%= toast.type === 'error' ? '!' : '✓' %></span><p><%= toast.message %></p><button type="button" aria-label="Fermer" data-toast-close>×</button></div><% } %>
+<main class="wrap content">
+<script src="/js/ui.js" defer></script>

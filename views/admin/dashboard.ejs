@@ -1,0 +1,35 @@
+<%- include('../partials/header') %>
+<%- include('shell-start') %>
+
+<header class="admin-page-header">
+  <div><p class="admin-kicker"><%= currentUser.role === 'moderator' ? 'Espace modération' : currentUser.role === 'admin' ? 'Espace administration' : 'Supervision générale' %></p><h1>Bonjour, <%= currentUser.username %></h1><p>Voici les principaux indicateurs opérationnels du forum.</p></div>
+  <button class="admin-primary-action" type="button" data-sanction-dialog data-username="" data-type="ban"><span class="glyphicon glyphicon-ban-circle"></span>Sanctionner par pseudo</button>
+</header>
+
+<section class="admin-metric-grid" aria-label="Indicateurs opérationnels">
+  <article><span class="admin-metric-icon metric-online glyphicon glyphicon-signal"></span><div><small>Connectés maintenant</small><strong><%= metrics.online %></strong><em>présence active</em></div></article>
+  <article><span class="admin-metric-icon metric-blue glyphicon glyphicon-comment"></span><div><small>Messages aujourd’hui</small><strong><%= metrics.postsToday %></strong><em><%= metrics.topicsToday %> nouveau<%= metrics.topicsToday > 1 ? 'x' : '' %> topic<%= metrics.topicsToday > 1 ? 's' : '' %></em></div></article>
+  <article><span class="admin-metric-icon metric-violet glyphicon glyphicon-user"></span><div><small>Nouveaux comptes</small><strong><%= metrics.newUsersToday %></strong><em>inscrits aujourd’hui</em></div></article>
+  <article class="<%= metrics.activeSanctions ? 'metric-attention' : '' %>"><span class="admin-metric-icon metric-orange glyphicon glyphicon-ban-circle"></span><div><small>Sanctions actives</small><strong><%= metrics.activeSanctions %></strong><em><a href="/admin/sanctions">ouvrir le suivi</a></em></div></article>
+  <article class="<%= metrics.deletedContent ? 'metric-attention' : '' %>"><span class="admin-metric-icon metric-red glyphicon glyphicon-trash"></span><div><small>Contenus supprimés</small><strong><%= metrics.deletedContent %></strong><em><a href="/admin/contenus-supprimes">ouvrir la file</a></em></div></article>
+  <article><span class="admin-metric-icon metric-slate glyphicon glyphicon-list-alt"></span><div><small>Actions du staff</small><strong><%= metrics.actionsToday %></strong><em>enregistrées aujourd’hui</em></div></article>
+</section>
+
+<div class="admin-dashboard-grid">
+  <section class="admin-card admin-trend-card">
+    <div class="admin-card-head"><div><p class="admin-kicker">Charge de travail</p><h2>Activité sur 7 jours</h2></div><span class="admin-count-chip"><%= moderationTrend.reduce((sum, day) => sum + day.actions, 0) %> actions</span></div>
+    <% const trendMaximum = Math.max(1, ...moderationTrend.map(day => day.actions)); %>
+    <div class="admin-mini-chart"><% moderationTrend.forEach(day => { %><div><span title="<%= day.actions %> action(s)" style="height:<%= Math.max(6, Math.round(day.actions / trendMaximum * 100)) %>%"></span><small><%= day.day.slice(5).replace('-', '/') %></small></div><% }) %></div>
+    <div class="admin-role-distribution"><% ['developer','admin','moderator','member'].forEach(role => { %><div><span class="role-name-<%= role %>"><%= roleLabels[role] %></span><strong><%= roleCounts[role] %></strong></div><% }) %></div>
+  </section>
+
+  <section class="admin-card">
+    <div class="admin-card-head"><div><p class="admin-kicker">Traçabilité</p><h2>Dernières actions</h2></div><a href="/moderation">Journal complet</a></div>
+    <ol class="admin-audit-list compact"><% recentActions.forEach(log => { %><li><span class="admin-audit-icon glyphicon glyphicon-check"></span><div><strong><%= log.actor_name || 'Système' %></strong><p><%= log.details || log.action.replaceAll('_',' ') %></p><time><%= log.created_at %></time></div></li><% }) %></ol>
+  </section>
+</div>
+
+<%- include('../partials/sanction-dialog') %>
+<script src="/js/forum.js" defer></script>
+<%- include('shell-end') %>
+<%- include('../partials/footer') %>

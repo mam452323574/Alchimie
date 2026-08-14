@@ -1,0 +1,52 @@
+<%- include('partials/header') %>
+
+<div class="settings-page-head"><div><p class="eyebrow">Espace personnel</p><h1>Paramètres du compte</h1></div><span class="settings-gear" aria-hidden="true">⚙</span></div>
+
+<% if (error) { %><p class="error notice"><%= error %></p><% } %>
+<% if (success) { %><p class="success notice"><%= success %></p><% } %>
+
+<div class="settings-grid">
+  <section class="settings-block settings-wide">
+    <h2>Personnalisation du profil</h2>
+    <form action="/compte/profil" method="POST" class="std-form">
+      <label for="avatar-url">Photo de profil ou GIF</label>
+      <input id="avatar-url" type="url" name="avatar_url" value="<%= currentUser.avatar_url || '' %>" placeholder="https://i.imgur.com/avatar.png">
+      <p class="field-hint">PNG/JPG : format carré. GIF animé : disponible à partir du rang Platine (5 000 points).</p>
+      <p class="field-hint">PNG/JPG : affichage carré. GIF : les formats plus hauts sont conservés.</p>
+      <label for="profile-bg">Fond du profil - lien Imgur</label>
+      <input id="profile-bg" type="url" name="profile_bg_url" value="<%= currentUser.profile_bg_url || '' %>" placeholder="https://i.imgur.com/fond.jpg">
+      <label for="youtube-url">Musique YouTube</label>
+      <input id="youtube-url" type="url" name="youtube_url" value="<%= currentUser.youtube_url || '' %>" placeholder="https://youtube.com/watch?v=...">
+      <label for="bio">Biographie</label>
+      <textarea id="bio" name="bio" rows="8" maxlength="2000" placeholder="Présente-toi..."><%= currentUser.bio || '' %></textarea>
+      <p class="field-hint">Mise en forme : &lt;g&gt;gras&lt;/g&gt;, &lt;i&gt;italique&lt;/i&gt;, &lt;s&gt;barré&lt;/s&gt;, &lt;u&gt;souligné&lt;/u&gt;, &lt;color=#7da4d6&gt;texte&lt;/color&gt;. Une image Imgur directe peut être collée seule ou entourée de [img] et [/img].</p>
+      <button class="btn" type="submit">Enregistrer le profil</button>
+    </form>
+  </section>
+
+  <div>
+    <section class="settings-block">
+      <h2>Compte vérifié</h2>
+      <p class="account-email"><span>Adresse e-mail</span><strong><%= currentUser.email || 'Compte système' %></strong></p>
+      <span class="verified-badge">✓ Adresse validée</span>
+    </section>
+    <section class="settings-block">
+      <h2>Signature</h2>
+      <form action="/compte/signature" method="POST" class="std-form">
+        <textarea name="signature" rows="4" maxlength="300"><%= currentUser.signature %></textarea>
+        <button class="btn" type="submit">Enregistrer</button>
+      </form>
+    </section>
+    <section class="settings-block">
+      <h2>Mot de passe</h2>
+      <form action="/compte/mot-de-passe" method="POST" class="std-form">
+        <label>Mot de passe actuel</label><input type="password" name="current_password" required autocomplete="current-password">
+        <label>Nouveau mot de passe</label><input type="password" name="new_password" required minlength="12" maxlength="72" autocomplete="new-password">
+        <label>Confirmation</label><input type="password" name="new_password_confirm" required minlength="12" maxlength="72" autocomplete="new-password">
+        <button class="btn" type="submit">Changer le mot de passe</button>
+      </form>
+    </section>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

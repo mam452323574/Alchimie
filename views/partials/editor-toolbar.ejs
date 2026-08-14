@@ -1,0 +1,49 @@
+<div class="editor-toolbar" role="toolbar" aria-label="Mise en forme du message">
+  <button type="button" data-editor-wrap="b" aria-label="Gras" title="Gras"><strong>B</strong></button>
+  <button type="button" data-editor-wrap="i" aria-label="Italique" title="Italique"><em>I</em></button>
+  <button type="button" data-editor-wrap="s" aria-label="Barré" title="Barré"><s>S</s></button>
+  <button type="button" data-editor-wrap="u" aria-label="Souligné" title="Souligné"><u>U</u></button>
+  <span class="toolbar-separator"></span>
+  <div class="editor-color-picker" data-editor-color-picker>
+    <button type="button" data-editor-color-toggle aria-label="Choisir la couleur du texte" aria-expanded="false" title="Couleur du texte"><span class="color-tool" data-editor-color-indicator>A</span></button>
+    <div class="editor-color-popover" data-editor-color-popover role="dialog" aria-label="Sélecteur de couleur" hidden>
+      <div class="editor-color-popover-head"><strong>Couleur du texte</strong><span>Choisis une couleur</span></div>
+      <div class="editor-color-presets" aria-label="Couleurs classiques">
+        <button type="button" style="--swatch:#000000" data-editor-color-value="#000000" aria-label="Noir" title="Noir"></button>
+        <button type="button" style="--swatch:#ffffff" data-editor-color-value="#FFFFFF" aria-label="Blanc" title="Blanc"></button>
+        <button type="button" style="--swatch:#8b95a1" data-editor-color-value="#8B95A1" aria-label="Gris" title="Gris"></button>
+        <button type="button" style="--swatch:#e74c3c" data-editor-color-value="#E74C3C" aria-label="Rouge" title="Rouge"></button>
+        <button type="button" style="--swatch:#f39c12" data-editor-color-value="#F39C12" aria-label="Orange" title="Orange"></button>
+        <button type="button" style="--swatch:#f1c40f" data-editor-color-value="#F1C40F" aria-label="Jaune" title="Jaune"></button>
+        <button type="button" style="--swatch:#2ecc71" data-editor-color-value="#2ECC71" aria-label="Vert" title="Vert"></button>
+        <button type="button" style="--swatch:#1abc9c" data-editor-color-value="#1ABC9C" aria-label="Turquoise" title="Turquoise"></button>
+        <button type="button" style="--swatch:#3498db" data-editor-color-value="#3498DB" aria-label="Bleu" title="Bleu"></button>
+        <button type="button" style="--swatch:#9b59b6" data-editor-color-value="#9B59B6" aria-label="Violet" title="Violet"></button>
+        <button type="button" style="--swatch:#e84393" data-editor-color-value="#E84393" aria-label="Rose" title="Rose"></button>
+        <button type="button" style="--swatch:#8eb9e8" data-editor-color-value="#8EB9E8" aria-label="Bleu pastel" title="Bleu pastel"></button>
+      </div>
+      <div class="editor-custom-color">
+        <label for="editor-custom-color">Couleur personnalisée</label>
+        <div><input id="editor-custom-color" type="color" value="#8eb9e8" data-editor-color-input aria-label="Ouvrir la roue des couleurs"><output data-editor-color-output>#8EB9E8</output><button type="button" data-editor-color-apply>Appliquer</button></div>
+      </div>
+    </div>
+  </div>
+  <button type="button" data-editor-image aria-label="Insérer une image par URL" title="Image ou lien Imgur"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span></button>
+  <button type="button" data-editor-upload aria-label="Uploader une image" title="Uploader une image"><span class="glyphicon glyphicon-upload" aria-hidden="true"></span></button>
+  <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" data-editor-upload-input hidden>
+  <input type="hidden" value="<%= csrfToken %>" data-editor-upload-csrf>
+  <span class="editor-upload-status" data-editor-upload-status aria-live="polite"></span>
+  <button type="button" data-editor-spoiler aria-label="Insérer un spoiler" title="Spoiler">◉</button>
+  <button type="button" data-editor-wrap="quote" aria-label="Insérer une citation" title="Citation">❝</button>
+  <span class="toolbar-separator"></span>
+  <button type="button" class="risibank-tool" data-editor-risibank aria-label="Choisir un sticker sur RisiBank" title="Stickers RisiBank"><span aria-hidden="true">RB</span></button>
+  <div class="editor-emoji-picker" data-editor-emoji-picker>
+    <button type="button" data-editor-emoji-toggle aria-label="Ouvrir le sélecteur d’emoji" aria-expanded="false" title="Emoji">😀</button>
+    <div class="editor-emoji-popover" data-editor-emoji-popover role="dialog" aria-label="Sélecteur d’emoji" hidden>
+      <div class="editor-emoji-head"><div><strong>Emojis</strong><span data-editor-emoji-category-name>Visages</span></div><button type="button" data-editor-emoji-close aria-label="Fermer le sélecteur">×</button></div>
+      <div class="editor-emoji-categories" role="tablist" aria-label="Catégories d’emoji" data-editor-emoji-categories></div>
+      <div class="editor-emoji-grid" role="listbox" aria-label="Emojis de la catégorie" data-editor-emoji-grid></div>
+    </div>
+  </div>
+  <span class="editor-help">Liens et vidéos automatiques</span>
+</div>

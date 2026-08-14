@@ -1,0 +1,22 @@
+<%- include('../partials/header') %>
+
+<section class="auth-card">
+<p class="eyebrow">Espace membre</p>
+<h1>Connexion</h1>
+
+<% if (error) { %><p class="error"><%= error %></p><% } %>
+
+<form action="/connexion" method="POST" class="std-form narrow">
+  <label>Pseudo ou adresse e-mail</label>
+  <input type="text" name="username" required value="<%= oldUsername %>" autocomplete="username">
+
+  <label>Mot de passe</label>
+  <input type="password" name="password" required autocomplete="current-password">
+
+  <button class="btn" type="submit">Se connecter</button>
+</form>
+
+<p>Pas encore de compte ? <a href="/inscription">Inscris-toi</a>.</p>
+</section>
+
+<%- include('../partials/footer') %>

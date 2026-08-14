@@ -1,0 +1,11 @@
+<%- include('partials/header') %>
+<section class="public-status-page">
+  <header class="status-hero status-<%= service.status %>">
+    <span class="status-hero-icon"><i></i></span>
+    <div><p class="eyebrow">État du service</p><h1><%= service.label %></h1><p><%= service.message || (service.status === 'operational' ? `Tous les services publics de ${siteName} fonctionnent normalement.` : 'Une intervention est en cours. Les informations seront actualisées ici.') %></p></div>
+  </header>
+  <% if (service.scheduledAt) { %><aside class="scheduled-maintenance"><strong>Maintenance programmée</strong><span><%= service.scheduledAt %></span></aside><% } %>
+  <section class="panel status-components"><div class="page-head"><div><p class="eyebrow">Composants</p><h2>Disponibilité actuelle</h2></div><small>Vérifié le <%= checkedAt %></small></div><div><% components.forEach(component => { const componentLabels = { operational: 'Opérationnel', degraded: 'Dégradé', maintenance: 'En maintenance', unavailable: 'Indisponible' }; %><article><span><i class="component-<%= component.state %>"></i><strong><%= component.name %></strong></span><em class="component-label-<%= component.state %>"><%= componentLabels[component.state] %></em></article><% }) %></div></section>
+  <p class="status-privacy-note">Cette page présente uniquement un état général et ne divulgue aucune information sur l’infrastructure du service.</p>
+</section>
+<%- include('partials/footer') %>

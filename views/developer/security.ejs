@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+<%- include('../admin/shell-start') %>
+
+<header class="admin-page-header security-page-header">
+  <div>
+    <p class="admin-kicker">Développeurs uniquement</p>
+    <h1>Signaux de sécurité</h1>
+    <p>Détection applicative, contrôles de configuration et suivi des événements à examiner.</p>
+  </div>
+  <span class="security-summary-pill <%= metrics.critical ? 'security-summary-alert' : 'security-summary-ok' %>"><i></i><%= metrics.critical ? metrics.critical + ' signal' + (metrics.critical > 1 ? 'aux critiques' : ' critique') + ' à examiner' : 'Aucun signal critique sur la période' %></span>
+</header>
+
+<aside class="security-interpretation-note">
+  <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+  <p><strong>Un signal n’est pas une preuve de compromission.</strong> Cette vue aide à repérer des comportements inhabituels sans afficher de mots de passe, cookies, e-mails ou adresses IP brutes. Les sources sont pseudonymisées.</p>
+</aside>
+
+<nav class="security-period-tabs" aria-label="Période des signaux">
+  <a class="<%= period === 'day' ? 'active' : '' %>" href="?periode=day">24 heures</a>
+  <a class="<%= period === 'week' ? 'active' : '' %>" href="?periode=week">7 jours</a>
+  <a class="<%= period === 'month' ? 'active' : '' %>" href="?periode=month">30 jours</a>
+</nav>
+
+<section class="admin-metric-grid security-metric-grid" aria-label="Indicateurs de sécurité">
+  <article><span class="admin-metric-icon metric-blue glyphicon glyphicon-signal"></span><div><small>Événements</small><strong><%= metrics.events %></strong><em>tous niveaux</em></div></article>
+  <article class="<%= metrics.critical ? 'metric-attention' : '' %>"><span class="admin-metric-icon metric-red glyphicon glyphicon-lock"></span><div><small>Critiques</small><strong><%= metrics.critical %></strong><em>à qualifier</em></div></article>
+  <article><span class="admin-metric-icon metric-orange glyphicon glyphicon-user"></span><div><small>Connexions refusées</small><strong><%= metrics.failedLogins %></strong><em>compte ou second verrou</em></div></article>
+  <article><span class="admin-metric-icon metric-violet glyphicon glyphicon-search"></span><div><small>Sondes sensibles</small><strong><%= metrics.sensitiveProbes %></strong><em>reconnaissance détectée</em></div></article>
+  <article><span class="admin-metric-icon metric-slate glyphicon glyphicon-ban-circle"></span><div><small>Accès refusés</small><strong><%= metrics.accessDenied %></strong><em>droits insuffisants</em></div></article>
+  <article><span class="admin-metric-icon metric-red glyphicon glyphicon-hdd"></span><div><small>Erreurs serveur</small><strong><%= metrics.serverErrors %></strong><em>réponses HTTP 5xx</em></div></article>
+</section>
+
+<div class="security-overview-grid">
+  <section class="admin-card security-trend-card">
+    <div class="admin-card-head"><div><p class="admin-kicker">Tendance</p><h2>Sept derniers jours</h2></div><span class="admin-count-chip">Critiques + avertissements</span></div>
+    <% const trendMaximum = Math.max(1, ...trend.flatMap(day => [day.critical, day.warning])); %>
+    <div class="security-trend-chart" aria-label="Évolution des signaux sur sept jours">
+      <% trend.forEach(day => { %><div class="security-trend-column"><div class="security-trend-bars"><i class="critical" style="height:<%= Math.max(3, Math.round(day.critical / trendMaximum * 100)) %>%" title="<%= day.critical %> critique(s)"></i><i class="warning" style="height:<%= Math.max(3, Math.round(day.warning / trendMaximum * 100)) %>%" title="<%= day.warning %> avertissement(s)"></i></div><small><%= new Date(day.day + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '') %></small></div><% }) %>
+    </div>
+    <div class="security-chart-legend"><span><i class="critical"></i>Critique</span><span><i class="warning"></i>Avertissement</span></div>
+  </section>
+
+  <section class="admin-card">
+    <div class="admin-card-head"><div><p class="admin-kicker">Configuration</p><h2>Contrôles essentiels</h2></div></div>
+    <div class="security-check-list">
+      <% configurationChecks.forEach(check => { %><article class="security-check-<%= check.status %>"><span class="security-check-indicator"><%= check.status === 'ok' ? '✓' : (check.status === 'neutral' ? 'i' : '!') %></span><div><strong><%= check.label %></strong><p><%= check.detail %></p></div></article><% }) %>
+    </div>
+  </section>
+</div>
+
+<div class="security-data-grid">
+  <section class="admin-card security-events-card">
+    <div class="admin-card-head"><div><p class="admin-kicker">Journal protégé</p><h2>Événements récents</h2></div><span class="admin-count-chip"><%= events.length %> affiché<%= events.length > 1 ? 's' : '' %></span></div>
+    <div class="admin-table-wrap">
+      <table class="admin-data-table security-events-table">
+        <thead><tr><th>Niveau</th><th>Événement</th><th>Contexte</th><th>Source</th><th>Date</th></tr></thead>
+        <tbody>
+          <% events.forEach(event => { %><tr><td><span class="security-severity severity-<%= event.severity %>"><%= event.severity === 'critical' ? 'Critique' : (event.severity === 'warning' ? 'Avert.' : 'Info') %></span></td><td><strong><%= eventLabels[event.event_type] || event.event_type %></strong><small><%= event.details || 'Aucun détail additionnel' %></small></td><td><code><%= event.method || '-' %> <%= event.path || '/' %></code><% if (event.status_code) { %><small>HTTP <%= event.status_code %></small><% } %><% if (event.actor_name) { %><small>Compte : <span class="role-name-<%= event.actor_role %>"><%= event.actor_name %></span></small><% } %></td><td><code><%= event.source_hash || 'inconnue' %></code></td><td><time><%= event.created_at %></time></td></tr><% }) %>
+          <% if (!events.length) { %><tr><td colspan="5" class="admin-empty-line">Aucun événement sur cette période.</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="admin-card security-source-card">
+    <div class="admin-card-head"><div><p class="admin-kicker">Activité</p><h2>Sources fréquentes</h2></div></div>
+    <ol class="security-source-list">
+      <% sourceActivity.forEach(source => { %><li><span><code><%= source.source_hash %></code><small>Dernière vue : <%= source.last_seen %></small></span><strong><%= source.events %><small>événement<%= source.events > 1 ? 's' : '' %></small></strong><em class="<%= source.critical ? 'has-critical' : '' %>"><%= source.critical %> critique<%= source.critical > 1 ? 's' : '' %></em></li><% }) %>
+      <% if (!sourceActivity.length) { %><li class="admin-empty-line">Aucune source enregistrée.</li><% } %>
+    </ol>
+  </aside>
+</div>
+
+<section class="admin-card maintenance-control" id="maintenance">
+  <div class="admin-card-head"><div><p class="admin-kicker">Communication publique</p><h2>État et maintenance</h2><p>Met à jour la page visible par tous sans exposer l’infrastructure.</p></div><a class="admin-text-button" href="/etat-du-service" target="_blank" rel="noopener">Voir la page publique</a></div>
+  <form action="/developpeur/maintenance" method="POST" class="maintenance-form">
+    <label>État actuel<select name="status"><option value="operational" <%= service.status === 'operational' ? 'selected' : '' %>>Opérationnel</option><option value="degraded" <%= service.status === 'degraded' ? 'selected' : '' %>>Service dégradé</option><option value="maintenance" <%= service.status === 'maintenance' ? 'selected' : '' %>>Maintenance en cours</option></select></label>
+    <label>Maintenance programmée<input type="datetime-local" name="scheduled_at" value="<%= service.scheduledAt %>"></label>
+    <label class="maintenance-message-field">Message public<textarea name="message" maxlength="500" rows="3" placeholder="Explique brièvement l’impact et l’heure estimée de retour."><%= service.message %></textarea></label>
+    <button class="admin-primary-action" type="submit"><span class="glyphicon glyphicon-check"></span>Publier l’état</button>
+  </form>
+</section>
+
+<aside class="security-scope-note"><strong>Limites de cette vue</strong><p>Elle couvre les événements de l’application <%= siteName %>. Elle ne remplace pas les journaux du VPS, du pare-feu, du reverse proxy, des sauvegardes ou de l’hébergeur, et ne peut pas prouver à elle seule l’absence d’une fuite de données.</p></aside>
+
+<%- include('../admin/shell-end') %>
+<%- include('../partials/footer') %>

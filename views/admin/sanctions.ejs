@@ -1,0 +1,22 @@
+<%- include('../partials/header') %>
+<%- include('shell-start') %>
+
+<header class="admin-page-header">
+  <div><p class="admin-kicker">Suivi de modération</p><h1>Sanctions actives</h1><p>Bannissements, exclusions temporaires et éradications actuellement en vigueur.</p></div>
+  <button class="admin-primary-action" type="button" data-sanction-dialog data-username="" data-type="ban"><span class="glyphicon glyphicon-ban-circle"></span>Nouvelle sanction</button>
+</header>
+
+<section class="admin-card">
+  <div class="admin-card-head"><div><p class="admin-kicker">Accès suspendus</p><h2>File active</h2></div><span class="admin-count-chip"><%= activeSanctions.length %> sanction<%= activeSanctions.length > 1 ? 's' : '' %></span></div>
+  <div class="admin-operational-list">
+    <% activeSanctions.forEach(sanction => { const sanctionLabel = sanction.is_eradication ? 'Éradication' : sanction.type === 'exclusion' ? 'Exclusion' : 'Bannissement'; %>
+      <article><span class="admin-status-dot status-<%= sanction.is_eradication ? 'eradication' : sanction.type %>"></span><div><strong class="role-name-<%= sanction.target_role %>"><%= sanction.target_name %></strong><p><%= sanctionLabel %> par <%= sanction.issuer_name %><%= sanction.reason ? ' - Motif : « ' + sanction.reason + ' »' : ' - aucun motif' %></p><small><%= sanction.ends_at ? 'Fin prévue : ' + sanction.ends_at : 'Durée indéterminée' %></small></div><% if (sanction.can_revoke) { %><form action="/moderation/sanctions/<%= sanction.id %>/revoquer" method="POST"><button class="admin-text-button" type="submit">Révoquer</button></form><% } %></article>
+    <% }) %>
+    <% if (!activeSanctions.length) { %><div class="admin-empty-state"><span class="glyphicon glyphicon-ok-circle"></span><strong>Aucune sanction active</strong><p>La file de suivi est vide.</p></div><% } %>
+  </div>
+</section>
+
+<%- include('../partials/sanction-dialog') %>
+<script src="/js/forum.js" defer></script>
+<%- include('shell-end') %>
+<%- include('../partials/footer') %>

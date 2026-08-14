@@ -1,0 +1,11 @@
+<dialog class="sanction-dialog" id="sanction-dialog">
+  <form action="/moderation/sanctions" method="POST" class="std-form">
+    <div class="dialog-head"><div><p class="eyebrow" id="sanction-kicker">Sanction</p><h2 id="sanction-title">Sanctionner</h2></div><button type="button" class="dialog-close" data-dialog-close aria-label="Fermer">×</button></div>
+    <input type="hidden" name="user_id" id="sanction-user-id"><input type="hidden" name="type" id="sanction-type">
+    <div id="sanction-username-field" hidden><label for="sanction-username">Pseudo du membre</label><input id="sanction-username" name="username" type="text" maxlength="20" autocomplete="off" placeholder="Pseudo exact"></div>
+    <div class="duration-fields" id="sanction-duration"><label for="sanction-duration-value">Durée</label><div class="duration-row"><input id="sanction-duration-value" type="number" min="1" max="10000" name="duration" value="1"><select name="duration_unit"><option value="hours">Heure(s)</option><option value="days" selected>Jour(s)</option><option value="weeks">Semaine(s)</option><option value="months">Mois</option></select></div></div>
+    <label for="sanction-reason">Motif <span class="muted">(facultatif)</span></label><textarea id="sanction-reason" name="reason" rows="4" maxlength="500" placeholder="Aucun motif si ce champ reste vide"></textarea>
+    <p class="eradication-warning" id="eradication-warning" hidden>L'éradication bloque définitivement le compte et masque tous ses topics et messages. Le contenu restera consultable et restaurable uniquement par le staff.</p>
+    <button class="btn" type="submit" id="sanction-submit">Confirmer la sanction</button>
+  </form>
+</dialog>
