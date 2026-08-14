@@ -8,6 +8,7 @@ const { formatBio, youtubeEmbedUrl } = require('../utils/profile');
 const { MODERATION_ROLES, ADMIN_ROLES, canModerateTarget, logModeration, getActiveSanction } = require('../utils/moderation');
 const { recalculateContentCounters } = require('../utils/content');
 const { publishPublicMessage } = require('../utils/realtime');
+const { getPrimaryForum } = require('../db/core-structure');
 const {
   POINT_RULES, adjustPoints, canAccessBlackTopics, rankForPoints,
 } = require('../utils/points');
@@ -129,8 +130,8 @@ router.get('/', (req, res) => {
   res.render('index', { categories, forumsByCategory, stats });
 });
 
-// L'onglet Forum correspond au Blabla général. Les autres espaces restent
-// accessibles comme sous-forums depuis la barre latérale.
+// L'onglet Forum ouvre le Blabla lorsqu'il existe, sinon le premier forum
+// configuré. Cela conserve la navigation après une personnalisation des slugs.
 router.get('/forum', (req, res) => {
   const parameters = new URLSearchParams();
   const search = String(req.query.q || '').trim().slice(0, 100);
@@ -140,7 +141,11 @@ router.get('/forum', (req, res) => {
   if (search) parameters.set('scope', scope);
   if (page > 1) parameters.set('page', String(page));
   const query = parameters.toString();
-  res.redirect(`/f/blabla${query ? `?${query}` : ''}`);
+  const primaryForum = getPrimaryForum(db);
+  if (!primaryForum) {
+    return res.status(503).render('error', { message: 'Aucun forum disponible.', statusCode: 503 });
+  }
+  return res.redirect(`/f/${primaryForum.slug}${query ? `?${query}` : ''}`);
 });
 
 // Liste des threads d'un forum
@@ -173,8 +178,10 @@ router.get('/f/:slug', (req, res) => {
      WHERE forum_id = ? AND (? = '' OR ${searchColumn} LIKE ? COLLATE NOCASE) ${deletedFilter} ${blackFilter}`
   ).get(forum.id, search, filter).c;
   const totalPages = Math.max(1, Math.ceil(totalThreads / THREADS_PER_PAGE));
-  const mainForum = db.prepare("SELECT * FROM forums WHERE slug = 'blabla'").get();
-  const subForums = db.prepare("SELECT * FROM forums WHERE slug != 'blabla' ORDER BY position").all();
+  const mainForum = getPrimaryForum(db);
+  const subForums = mainForum
+    ? db.prepare('SELECT * FROM forums WHERE id != ? ORDER BY position, id').all(mainForum.id)
+    : [];
   const threadDraft = req.session.threadDraft?.forumSlug === forum.slug
     ? req.session.threadDraft
     : null;
@@ -182,6 +189,7 @@ router.get('/f/:slug', (req, res) => {
 
   res.render('forum', {
     forum, threads, page, totalPages, totalThreads, search, searchScope, mainForum, subForums,
+    isMainForum: forum.id === mainForum?.id,
     composerError: threadDraft?.error || null,
     oldTitle: threadDraft?.oldTitle || '',
     oldBody: threadDraft?.oldBody || '',

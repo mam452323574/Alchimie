@@ -17,11 +17,13 @@ cd forum
 npm install
 cp .env.example .env
 # édite .env : mets un SESSION_SECRET aléatoire et un mot de passe admin
-npm run seed      # crée quelques catégories/forums de démo (une seule fois)
+npm run seed      # facultatif : ajoute quelques catégories/forums de démonstration
 npm start
 ```
 
-Le forum écoute sur http://localhost:3000. Un compte admin est créé
+Le premier démarrage crée uniquement la catégorie `Général` et le forum public
+`Blabla` lorsque la base ne contient encore aucun forum. Aucun faux compte,
+sujet ou message n'est ajouté. Le forum écoute sur http://localhost:3000. Un compte admin est créé
 automatiquement au tout premier démarrage avec le pseudo/mot de passe définis
 dans `.env` (`ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`) - connecte-toi puis va sur
 `/compte` pour changer le mot de passe si besoin. Le centre de contrôle demande

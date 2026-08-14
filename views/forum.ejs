@@ -48,7 +48,7 @@
     <% } %>
   </section>
   <aside class="side-stack">
-    <% if (forum.slug === 'blabla') { %><section class="side-card"><h3>Autres forums</h3><div class="forum-directory"><div><% subForums.forEach(subForum => { %><a href="/f/<%= subForum.slug %>"><%= subForum.name %></a><% }) %><% if (!subForums.length) { %><p class="side-note">Aucun sous-forum disponible.</p><% } %></div></div></section><% } else { %><section class="side-card"><h3>Autres forums</h3><div class="forum-directory"><div><% if (mainForum) { %><a href="/f/<%= mainForum.slug %>"><%= mainForum.name %></a><% } %></div></div></section><% } %>
+    <% if (isMainForum) { %><section class="side-card"><h3>Autres forums</h3><div class="forum-directory"><div><% subForums.forEach(subForum => { %><a href="/f/<%= subForum.slug %>"><%= subForum.name %></a><% }) %><% if (!subForums.length) { %><p class="side-note">Aucun sous-forum disponible.</p><% } %></div></div></section><% } else { %><section class="side-card"><h3>Autres forums</h3><div class="forum-directory"><div><% if (mainForum) { %><a href="/f/<%= mainForum.slug %>"><%= mainForum.name %></a><% } %></div></div></section><% } %>
     <section class="side-card"><div class="quick-links"><a href="/moderation">Modération</a><a href="/statistiques">Statistiques</a><a href="/etat-du-service">État du service</a><% if (currentUser) { %><a href="/mes-messages">Mes messages</a><a href="#nouveau-sujet">Créer un sujet</a><% } %></div></section>
     <%- include('partials/online-count') %>
   </aside>

@@ -4,6 +4,7 @@
   "description": "Alchimie, forum communautaire web auto-hébergé",
   "main": "server.js",
   "scripts": {
+    "test": "node --test tests/*.test.js",
     "start": "node server.js",
     "seed": "node db/seed.js",
     "demo": "node db/demo-content.js",

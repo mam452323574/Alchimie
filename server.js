@@ -11,6 +11,7 @@ const { validateProductionEnvironment } = require('./utils/config');
 validateProductionEnvironment();
 const { formatPostBody, formatPrivateMessageBody } = require('./utils/sanitize');
 const db = require('./db/database');
+const { getPrimaryForum } = require('./db/core-structure');
 const packageInfo = require('./package.json');
 
 const { loadUser } = require('./middleware/auth');
@@ -208,6 +209,8 @@ app.use((req, res, next) => {
   res.locals.webmasters = getWebmasters();
   res.locals.legal = legalInformation;
   res.locals.path = req.path;
+  const primaryForum = getPrimaryForum(db);
+  res.locals.primaryForumPath = primaryForum ? `/f/${primaryForum.slug}` : '/forum';
   res.locals.roleLabels = {
     member: 'Membre', moderator: 'Modérateur', admin: 'Administrateur', developer: 'Développeur',
   };

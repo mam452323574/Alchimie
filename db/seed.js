@@ -19,22 +19,38 @@ const layout = [
   },
 ];
 
-const insertCategory = db.prepare('INSERT INTO categories (name, position) VALUES (?, ?)');
-const insertForum = db.prepare(
-  'INSERT INTO forums (category_id, name, description, slug, position) VALUES (?, ?, ?, ?, ?)'
-);
-
-const existing = db.prepare('SELECT COUNT(*) AS c FROM categories').get().c;
-if (existing > 0) {
-  console.log('Des catégories existent déjà, seed ignoré.');
-  process.exit(0);
-}
-
-layout.forEach((cat, ci) => {
-  const { lastInsertRowid: catId } = insertCategory.run(cat.name, ci);
-  cat.forums.forEach((f, fi) => {
-    insertForum.run(catId, f.name, f.description, f.slug, fi);
-  });
+const seed = db.transaction(() => {
+  let createdCategories = 0;
+  let createdForums = 0;
+  for (const [categoryPosition, categoryData] of layout.entries()) {
+    let category = db.prepare('SELECT * FROM categories WHERE name = ?').get(categoryData.name);
+    if (!category) {
+      const result = db.prepare(
+        'INSERT INTO categories (name, position) VALUES (?, ?)'
+      ).run(categoryData.name, categoryPosition);
+      category = db.prepare('SELECT * FROM categories WHERE id = ?').get(result.lastInsertRowid);
+      createdCategories += 1;
+    }
+    for (const [forumPosition, forumData] of categoryData.forums.entries()) {
+      const existingForum = db.prepare('SELECT id FROM forums WHERE slug = ?').get(forumData.slug);
+      if (existingForum) continue;
+      db.prepare(
+        `INSERT INTO forums (category_id, name, description, slug, position)
+         VALUES (?, ?, ?, ?, ?)`
+      ).run(
+        category.id,
+        forumData.name,
+        forumData.description,
+        forumData.slug,
+        forumPosition
+      );
+      createdForums += 1;
+    }
+  }
+  return { createdCategories, createdForums };
 });
 
-console.log('Seed terminé : catégories et forums de démo créés.');
+const result = seed();
+console.log(
+  `Seed terminé : ${result.createdCategories} catégorie(s) et ${result.createdForums} forum(s) ajoutés.`
+);

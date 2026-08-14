@@ -5,6 +5,7 @@ const path = require('path');
 const Database = require('better-sqlite3');
 const { hashPasswordSync, passwordValidationError, verifyPasswordSync } = require('../utils/passwords');
 const { isPlaceholder } = require('../utils/config');
+const { ensureCoreStructure } = require('./core-structure');
 const {
   encryptionEnabled, protectEmail, revealEmail, protectPrivateMessage,
 } = require('../utils/encryption');
@@ -238,6 +239,14 @@ CREATE TABLE IF NOT EXISTS security_events (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 `);
+
+// Les comptes et contenus restent privés et ne sont jamais amorcés ici. En
+// revanche, une installation sans aucun forum doit rester navigable : on crée
+// uniquement la structure publique minimale, de manière idempotente.
+const coreStructure = ensureCoreStructure(db);
+if (coreStructure.created) {
+  console.log(`[init] Forum principal créé : /f/${coreStructure.forum.slug}`);
+}
 
 // Second verrou partagé pour les outils sensibles. La valeur initiale reste
 // volontairement simple pour la première connexion et doit être remplacée par
